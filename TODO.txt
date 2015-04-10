@@ -1,0 +1,5 @@
+Add other tables to userModule.
+Create views and templates for wall and timeline.
+Modify home page template.
+Add cookies(Django Sessions) to remember which user has logged in.
+Create groupModule.

@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>Wee</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{loginForm.as_p}}
+        <input type="submit" name="submitLogin" />
+    </form>
+    <br />
+    <h1>Sign Up</h1>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{signupForm.as_p}}
+        <input type="submit" name="submitSignup"/>
+    </form>
+    <! -- TODO: Add javascript validation and date widget (maybe using jQuery)>
+</body>
+</html>
