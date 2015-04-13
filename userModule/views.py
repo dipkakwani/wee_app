@@ -1,3 +1,6 @@
+"""
+Author : Diptanshu Kakwani
+"""
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.db import connection
@@ -42,9 +45,10 @@ def home(request):
                 profilePic = os.path.join('static/userModule/images', 'default.png')
 
                 #NOTE:1.When using raw SQL Queries, you have to give the default values explicitly. 
-                #     2.Always write raw sql queries as written below to escape strings and prevent SQL injection
+                #     2.Always write raw sql queries as written below to escape strings and prevent SQL injection.
 
-                sql = "INSERT INTO userModule_user (name, email, password, dob, sex, description, profilePic, school, college, companyName, status, profession, website) VALUES (%s, %s, %s, %s, %s, '', %s, '', '', '' , '', '', '')"
+                sql = "INSERT INTO userModule_user (name, email, password, dob, sex, description, profilePic, school, college,\
+                        companyName, status, profession, website) VALUES (%s, %s, %s, %s, %s, '', %s, '', '', '' , '', '', '')"
                 cursor = connection.cursor()
                 cursor.execute(sql, [name, email, h, dob, sex, profilePic])
                 #Equivalent in Django ORM:
@@ -67,3 +71,9 @@ def home(request):
                     errors = login._errors.setdefault("password", ErrorList())
                     errors.append(u"Invalid email or password")
     return render(request, 'home.html', {'loginForm' : login, 'signupForm' : signup})
+
+def newsfeed(request):
+    pass 
+
+def timeline(request):
+    pass
