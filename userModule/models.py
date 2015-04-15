@@ -1,8 +1,9 @@
 """
 Author : Diptanshu Kakwani
-Contains all the models that are realted to users.
+Contains all the models that are related to users.
 """
 from django.db import models
+from datetime import datetime
 import os
 
 #Returns the path of the profile picture
@@ -69,3 +70,40 @@ class Following(models.Model):
     status = models.CharField(max_length=1, choices=STATUS)
     class Meta:
         unique_together = (("userA"), ("userB"),)
+        
+"""
+A post may or may not belong to a Group.
+"""
+class Post(models.Model):
+    postId = models.AutoField(primary_key=True)
+    posterId = models.ForeignKey('User')
+    PRIVACY = (('L','Limited'), ('P', 'Public'),)
+    privacy = models.CharField(max_length=1, choices=PRIVACY)
+    time = models.DateTimeField(default=datetime.now)
+    likes = models.BigIntegerField(default=0)
+    comments = models.BigIntegerField(default=0)
+    shares = models.BigIntegerField(default=0)
+    content = models.TextField()
+    groupId = models.ForeignKey('groupModule.Group', null=True)
+    class Meta:
+        ordering = ['-time']
+
+
+class Share(models.Model):
+    userId = models.ForeignKey('User', related_name='Share.userId')
+    postId = models.ForeignKey('Post', related_name='Share.postId')
+    class Meta:
+        unique_together = (('userId'), ("postId"),)    
+
+class Like(models.Model):
+    userId = models.ForeignKey('User', related_name='Like.userId')
+    postId = models.ForeignKey('Post', related_name='Like.postId')
+    class Meta:
+        unique_together = (('userId'), ("postId"),)    
+
+class Comment(models.Model):
+    userId = models.ForeignKey('User', related_name='Comment.userId')
+    postId = models.ForeignKey('Post', related_name='Comment.postId')
+    content = models.CharField(max_length=140)
+    class Meta:
+        unique_together = (('userId'), ("postId"),)

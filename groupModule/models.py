@@ -10,27 +10,11 @@ class Group(models.Model):
    adminId = models.ForeignKey('userModule.User')
 
 """
-User -- Joined -- Group
+User -- Joins -- Group
 A many-to-many relationship between User and Group
 """
-class Joined(models.Model):
+class Join(models.Model):
     groupId = models.ForeignKey('Group')
     userId = models.ForeignKey('userModule.User')
-
-"""
-User posts something.
-The post may or may not belong to a Group.
-"""
-class Post(models.Model):
-    postId = models.AutoField(primary_key=True)
-    posterId = models.ForeignKey('userModule.User')
-    PRIVACY = (('L','Limited'), ('P', 'Public'),)
-    privacy = models.CharField(max_length=1, choices=PRIVACY)
-    time = models.DateTimeField(default=datetime.now)
-    likes = models.BigIntegerField(default=0)
-    comments = models.BigIntegerField(default=0)
-    shares = models.BigIntegerField(default=0)
-    content = models.TextField()
-    groupId = models.ForeignKey('Group', null=True)
     class Meta:
-        ordering = ['-time']
+        unique_together = (('groupId'), ('userId'),)
