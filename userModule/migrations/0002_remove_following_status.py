@@ -11,10 +11,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='user',
-            name='password',
-            field=models.CharField(max_length=70),
-            preserve_default=True,
+        migrations.RemoveField(
+            model_name='following',
+            name='status',
         ),
     ]
