@@ -27,7 +27,6 @@ class Migration(migrations.Migration):
             name='Following',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('status', models.CharField(max_length=1, choices=[(b'F', b'Following')])),
             ],
             options={
             },
@@ -73,6 +72,7 @@ class Migration(migrations.Migration):
             name='Share',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('originalPostId', models.ForeignKey(to='userModule.Post')),
                 ('postId', models.ForeignKey(related_name='Share.postId', to='userModule.Post')),
             ],
             options={

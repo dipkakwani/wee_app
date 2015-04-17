@@ -80,18 +80,5 @@ def settings(request):
         form = SettingsForm(request.POST)
         #TODO:Complete this view.
 
-def newsfeed(request):
-    #TODO: Fetch the posts from currently logged in user's network.
-    pass 
-
-def timeline(request):
-    #TODO: Fetch the posts of currently logged in user.
-    pass
-
-#This view lets the user post something.
-def post(request):
-    #TODO: Complete this view.
-    pass
-
 def logout(request):
     pass

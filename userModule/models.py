@@ -89,6 +89,7 @@ class Post(models.Model):
 class Share(models.Model):
     userId = models.ForeignKey('User', related_name='Share.userId')
     postId = models.ForeignKey('Post', related_name='Share.postId')
+    originalPostId = models.ForeignKey('Post')
     class Meta:
         unique_together = (('userId'), ("postId"),)    
 
