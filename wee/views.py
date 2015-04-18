@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.conf import settings
 from userModule.models import User
 from userModule.models import Post
 from userModule.models import Friendship
@@ -8,10 +9,12 @@ from userModule.models import Like
 from userModule.models import Comment
 from groupModule.models import Group
 from groupModule.models import Join
+from userModule.security import *
 
 def newsfeed(request):
-    #TODO: Fetch the posts from currently logged in user's network.
-    pass 
+    #TODO: Fetch the posts from currently logged in user's network
+    pass
+
 
 def timeline(request):
     #TODO: Fetch the posts of currently logged in user.

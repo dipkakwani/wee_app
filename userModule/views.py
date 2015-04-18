@@ -3,34 +3,22 @@ Author : Diptanshu Kakwani
 """
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.db import connection
 from userModule.forms import SignupForm
 from userModule.forms import LoginForm
 from userModule.forms import SettingsForm
 from django.forms.util import ErrorList
 from userModule.models import User
-import random
-import string
-import hashlib
-import time
-import os
-
-
-#Functions to create hash of the password
-def makeSalt():
-    return ''.join(random.choice(string.letters) for x in xrange(5))
-
-def hashPassword(name, password, salt=""):
-    if not salt:
-        salt = makeSalt()
-    h = hashlib.sha256(name + password + salt).hexdigest()
-    return '%s,%s' % (h, salt)
-
-def validPassword(name, password, h):
-    return h == hashPassword(name, password, h.split(',')[1])
+from security import *
 
 #Cobmined signup and login view
 def home(request):
+    # Is the user already logged in
+    if "sessionId" in request.COOKIES:
+        if checkSecureVal(request.COOKIES["sessionId"]):
+	    return HttpResponseRedirect('/newsfeed')
+			
     signup = SignupForm()
     login = LoginForm()
     if request.method == 'POST':
@@ -51,11 +39,17 @@ def home(request):
                 sql = "INSERT INTO userModule_user (name, email, password, dob, sex, description, profilePic, school, college,\
                         companyName, status, profession, website) VALUES (%s, %s, %s, %s, %s, '', %s, '', '', '' , '', '', '')"
                 cursor = connection.cursor()
-                cursor.execute(sql, [name, email, h, dob, sex, profilePic])
+                cursor.execute(sql, [name, email, h, dob, sex, profilePic, ])
                 #Equivalent in Django ORM:
                 #u = User(name=name, pa)sword=h, email=email,dob=d, sex=sex)
                 #u.save()
-                return HttpResponseRedirect("/newsfeed")
+
+                response = HttpResponseRedirect('/newsfeed')
+
+                #Set cookie
+                setCookie(response, h)
+                
+                return response
 
         elif 'submitLogin' in request.POST:     #Login form submitted
             login = LoginForm(request.POST)
@@ -67,7 +61,10 @@ def home(request):
                 cursor.execute(sql, [email, ])
                 row = cursor.fetchone()
                 if row and validPassword(row[0], pw, row[1]):
-                    return HttpResponseRedirect("/newsfeed")
+                    response = HttpResponseRedirect('/newsfeed')
+		    setCookie(response, row[1])
+                    return response
+                    
                 else:
                     errors = login._errors.setdefault("password", ErrorList())
                     errors.append(u"Invalid email or password")
@@ -81,4 +78,7 @@ def settings(request):
         #TODO:Complete this view.
 
 def logout(request):
-    pass
+    response = HttpResponseRedirect('/home')
+    if "sessionId" in request.COOKIES:
+    	response.set_cookie('sessionId', '')
+    return response
