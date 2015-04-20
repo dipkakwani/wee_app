@@ -1,5 +1,7 @@
 Add other tables to userModule -- Done.
-Create views and templates for newsfeed, timeline, settings and logout.
+Create views and templates for newsfeed, timeline, settings, logout(Done), createGroup, post.
 Modify home page template.
-Add cookies(Django Sessions) to remember which user has logged in.
+Add cookies(Django Sessions) to remember which user has logged in -- Done.
 Create groupModule -- Done.
+Search users and groups.
+Let users join  groups.

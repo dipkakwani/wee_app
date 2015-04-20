@@ -13,13 +13,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='join',
+            model_name='joins',
             name='userId',
             field=models.ForeignKey(to='userModule.User'),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
-            name='join',
+            name='joins',
             unique_together=set([('groupId', 'userId')]),
         ),
         migrations.AddField(
