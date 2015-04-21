@@ -1,4 +1,6 @@
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.conf import settings
 from userModule.models import User
 from userModule.models import Post
@@ -8,8 +10,8 @@ from userModule.models import Share
 from userModule.models import Like
 from userModule.models import Comment
 from groupModule.models import Group
-from groupModule.models import Join
-from userModule.forms import PostForm
+from groupModule.models import Joins
+from wee.forms import PostForm
 from userModule.security import *
 
 from datetime import datetime
@@ -17,6 +19,7 @@ from datetime import datetime
 def newsfeed(request):
     #TODO: Fetch the posts from currently logged in user's network
     pass
+
 def timeline(request):
     # Check which user is currently logged in. Only a logged in user can view other users' profile.
     if "sessionId" in request.COOKIES:
@@ -32,16 +35,20 @@ def timeline(request):
 def newPost(request):
     if "sessionId" in request.COOKIES:
         userId = checkSecureVal(request.COOKIES["sessionId"])
-        if userId           # Valid user id?
+        if userId:           # Valid user id?
+            form = PostForm(userId)
             if request.method == 'POST':
-                form = PostForm(request.POST)
+                form = PostForm(request.POST, userId)
                 if form.is_valid():
                     content = request.POST.get('content')
-                    #TODO: Insert the data in post model.
+                    privacy = request.POST.get('privacy')
+                    group = request.POST.get('group')
+                    #TODO: Check if the post is a group post and store the data in post table.
+                    pass
                 else:
-                    #TODO:Render the post template with errors.
+                    return render(request, 'newpost.html', {'form' : form})
             else:
-                #TODO: Render the post template.
+                return render(request, 'newpost.html', {'form': form})
 
         else:       # Invalid user id
             return HttpResponseRedirect("/home")

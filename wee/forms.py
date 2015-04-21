@@ -1,18 +1,20 @@
 from django import forms
 from django.contrib.admin import widgets
 from django.db import connection
-from userModule.models import post
-from groupModule.models import joins
-from groupModule.models import group
+from userModule.models import Post
+from groupModule.models import Joins
+from groupModule.models import Group
 
 """
-A post form contains a text area and a list of groups which he/she has joined. 
+A post form contains a text area, privacy type and a list of groups which he/she has joined. 
 If the user wants to post in a group, he/she can select one of the groups from the dropdown menu.
 """
 class PostForm(forms.ModelForm):
-    def __init__(self, userId):
-        sqlGroupId = "SELECT groupId from joins WHERE userId = %s"
-        sqlGroup = "SELECT groupName, groupId from group WHERE groupId = %s"
+    def __init__(self, userId, *args, **kwargs):  
+        super(PostForm, self).__init__(*args, **kwargs)
+
+        sqlGroupId = "SELECT groupId_id from groupModule_joins WHERE userId_id = %s"
+        sqlGroup = "SELECT groupId, groupName from groupModule_group WHERE groupId = %s"
         cursor = connection.cursor()
         cursor.execute(sqlGroupId, [userId, ])
         groupIds = cursor.fetchall()
@@ -20,7 +22,7 @@ class PostForm(forms.ModelForm):
         for groupId in groupIds:
             cursor.execute(sqlGroup, [groupId, ])
             groups += cursor.fetchone()
-    #TODO: Create groups menu list based on the user's joined groups.
+        self.fields['group'] = forms.ChoiceField(choices=groups)
     class Meta:
-        model = post
-        include = ['content', ]
+        model = Post
+        fields = ['content', 'privacy',]

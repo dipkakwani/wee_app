@@ -11,6 +11,7 @@ from userModule.forms import SettingsForm
 from django.forms.util import ErrorList
 from userModule.models import User
 from security import *
+import os
 
 #Cobmined signup and login view
 def home(request):

@@ -1,4 +1,8 @@
 <html>
-Welcome, {{user}}
-{{form}}
+What's on your mind? <br/>
+<form method="POST">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit" name="newpost"/>
+</form>
 </html>
