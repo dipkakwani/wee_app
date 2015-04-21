@@ -4,7 +4,7 @@ from django.contrib.admin import widgets
 class SignupForm(forms.ModelForm):
     class Meta:
         model = User
-        include = ['name', 'email', 'dob', 'password','sex', ]
+        fields = ['name', 'email', 'dob', 'password','sex', ]
         widgets = {
             'password' : forms.PasswordInput(),
         }
@@ -12,11 +12,11 @@ class SignupForm(forms.ModelForm):
 class LoginForm(forms.Form):
     class Meta:
         model = User
-        include = ['email', 'password', ]
+        fields = ['email', 'password', ]
         widgets = {
                 'password' : forms.PasswordInput()
         }
-
+        
 class SettingsForm(forms.ModelForm):
     #TODO: Make each field optional.
     class Meta:
