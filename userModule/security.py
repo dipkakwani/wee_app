@@ -40,3 +40,8 @@ def setCookie(response, password):
     row = cursor.fetchone()
     if row:
 	response.set_cookie('sessionId', makeSecureVal(str(row[0])))
+
+def validateCookie(request):
+    if "sessionId" in request.COOKIES:
+        return checkSecureVal(request.COOKIES["sessionId"])
+    return None
