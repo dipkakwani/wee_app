@@ -1,0 +1,25 @@
+<html>
+<body>
+    {% if isFriend %}
+        <a href="friend.html">Remove Friend</a>
+        <br/>
+    {% elif not isSelf %}
+        <a href="friend.html">Add Friend</a>
+        <br />
+    {% endif %}
+    {% if posts %}
+        {% for post in posts %}
+            {{post.posterName}}
+            {% if post.groupName %}
+                posted in {{post.groupName}}
+            {% endif %}   
+            {{post.postDateTime}}
+            <br />
+            {{post.content}}
+            <br/>
+        {% endfor %}
+    {% else %}
+        No posts to show!
+    {% endif %}
+</body>
+</html>

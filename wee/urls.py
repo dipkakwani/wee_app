@@ -5,6 +5,7 @@ from userModule.views import logout
 from wee.views import newPost
 from wee.views import timeline
 from wee.views import newsfeed
+from wee.views import friend
 
 urlpatterns = patterns('',
     # Examples:
@@ -15,5 +16,6 @@ urlpatterns = patterns('',
     url(r'^home/$', home),
     url(r'^logout/$', logout),
     url(r'^post/$', newPost),
+    url(r'^timeline/(?P<profileUserId>\d+)/friend.html', friend),
     url(r'^timeline/(?P<profileUserId>\d+)/$', timeline),
 )

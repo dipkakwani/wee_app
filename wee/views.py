@@ -37,15 +37,18 @@ def timeline(request, profileUserId):
         friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR userA_id=%s AND userB_id=%s"
         cursor.execute(friendSql, [userId, profileUserId, profileUserId, userId, ])
         isFriend = cursor.fetchall()
+        isSelf = 1 if userId == profileUserId else 0
         #TODO: Complete this view.
+        posts = {}
         if isFriend or (userId == profileUserId):
             # Show all the private posts and the posts in mutual groups made by the profile user.
             # Fetch the mutual groupIds
-            return HttpResponse("private")
+            pass
         else:
             # Show all the public posts
-            return HttpResponse("Public")
-        
+            pass
+        return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isSelf' : isSelf})
+     
     return HttpResponseRedirect("/home")
 
 #This view lets the user post something.
@@ -64,3 +67,28 @@ def newPost(request):
         return render(request, 'newpost.html', {'form': form})
 
     return HttpResponseRedirect("/home")
+
+# Add or delete a friend
+def friend(request, profileUserId):
+    userId = validateCookie(request)
+    if userId:
+        # Check if the user with profileUserId exists or not
+        cursor = connection.cursor()
+        userSql = "SELECT 1 FROM userModule_user WHERE userId=%s"
+        cursor.execute(userSql, [profileUserId, ])
+        isUser = cursor.fetchall()
+        if not isUser or userId == profileUserId:
+            return HttpResponseRedirect("/notfound")
+
+        friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR userA_id=%s AND userB_id=%s"
+        cursor.execute(friendSql, [userId, profileUserId, profileUserId, userId, ])
+        isFriend = cursor.fetchall()
+        if isFriend:
+            # Delete this friend
+            deleteSql = "DELETE FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR userA_id=%s AND userB_id=%s"
+            cursor.execute(deleteSql, [userId, profileUserId, profileUserId, userId, ])
+        else:
+            # Add as a friend
+            addSql = "INSERT INTO userModule_friendship (userA_id, userB_id, status) VALUES (%s, %s, 'R')"
+            cursor.execute(addSql, [userId, profileUserId, ])
+    return HttpResponseRedirect("/timeline/" + profileUserId)
