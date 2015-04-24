@@ -118,3 +118,7 @@ def friend(request, profileUserId):
             addSql = "INSERT INTO userModule_friendship (userA_id, userB_id, status) VALUES (%s, %s, 'R')"
             cursor.execute(addSql, [userId, profileUserId, ])
     return HttpResponseRedirect("/timeline/" + profileUserId)
+
+    
+def notfound(request):
+    return render(request,'notfound.html')
