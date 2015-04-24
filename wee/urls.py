@@ -2,6 +2,8 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from userModule.views import home
 from userModule.views import logout
+from groupModule.views import createGroup
+from groupModule.views import group
 from wee.views import newPost
 from wee.views import timeline
 from wee.views import newsfeed
@@ -16,6 +18,8 @@ urlpatterns = patterns('',
     url(r'^home/$', home),
     url(r'^logout/$', logout),
     url(r'^post/$', newPost),
+    url(r'newgroup/', createGroup),
+    url(r'^group/(\d+)/$', group),
     url(r'^timeline/(?P<profileUserId>\d+)/friend.html', friend),
     url(r'^timeline/(?P<profileUserId>\d+)/$', timeline),
 )
