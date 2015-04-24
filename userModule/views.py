@@ -16,8 +16,7 @@ import os
 #Cobmined signup and login view
 def home(request):
     # Is the user already logged in
-    if "sessionId" in request.COOKIES:
-        if checkSecureVal(request.COOKIES["sessionId"]):
+    if validateCookie(request):
 	    return HttpResponseRedirect('/newsfeed')
 			
     signup = SignupForm()

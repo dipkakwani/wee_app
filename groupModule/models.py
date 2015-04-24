@@ -12,6 +12,7 @@ class Group(models.Model):
    groupName = models.CharField(max_length=64)
    GROUPTYPE = (('O', 'Open'), ('C', 'Closed'),)
    groupType = models.CharField(max_length=1, choices=GROUPTYPE)
+   description = models.TextField()
    adminId = models.ForeignKey('userModule.User')
 
 """

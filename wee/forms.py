@@ -10,18 +10,14 @@ A post form contains a text area, privacy type and a list of groups which he/she
 If the user wants to post in a group, he/she can select one of the groups from the dropdown menu.
 """
 class PostForm(forms.ModelForm):
-    def __init__(self, userId, *args, **kwargs):  
+    def __init__(self, *args, **kwargs):  
+        userId = kwargs.pop("user")
         super(PostForm, self).__init__(*args, **kwargs)
-
-        sqlGroupId = "SELECT groupId_id from groupModule_joins WHERE userId_id = %s"
-        sqlGroup = "SELECT groupId, groupName from groupModule_group WHERE groupId = %s"
+        groups = (('-', '-------'), )
+        sqlGroup = "SELECT distinct groupId, groupName FROM groupModule_group NATURAL JOIN groupModule_joins WHERE userId_id=%s;"
         cursor = connection.cursor()
-        cursor.execute(sqlGroupId, [userId, ])
-        groupIds = cursor.fetchall()
-        groups = ()
-        for groupId in groupIds:
-            cursor.execute(sqlGroup, [groupId, ])
-            groups += cursor.fetchone()
+        cursor.execute(sqlGroup, [userId, ])
+        groups += cursor.fetchall()
         self.fields['group'] = forms.ChoiceField(choices=groups)
     class Meta:
         model = Post

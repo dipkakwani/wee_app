@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
                 ('groupId', models.AutoField(serialize=False, primary_key=True)),
                 ('groupName', models.CharField(max_length=64)),
                 ('groupType', models.CharField(max_length=1, choices=[(b'O', b'Open'), (b'C', b'Closed')])),
+                ('description', models.TextField()),
             ],
             options={
             },

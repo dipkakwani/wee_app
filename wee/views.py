@@ -16,6 +16,11 @@ from userModule.security import *
 
 from datetime import datetime
 
+def dictFetchAll(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
+
 def newsfeed(request):
     #TODO: Fetch the posts from currently logged in user's network
     pass
@@ -38,15 +43,27 @@ def timeline(request, profileUserId):
         cursor.execute(friendSql, [userId, profileUserId, profileUserId, userId, ])
         isFriend = cursor.fetchall()
         isSelf = 1 if userId == profileUserId else 0
-        #TODO: Complete this view.
         posts = {}
+        # Fetch the mutual groupIds
+        mutualGroupSql = "SELECT groupId_id FROM groupModule_joins j1\
+                          WHERE EXISTS (SELECT groupId_id FROM groupModule_joins j2\
+                          WHERE j1.userId_id=%s AND j2.userId_id=%s);"
+
         if isFriend or (userId == profileUserId):
-            # Show all the private posts and the posts in mutual groups made by the profile user.
-            # Fetch the mutual groupIds
-            pass
+            # Show all the private and public user posts and the posts in mutual groups made by the profile user.
+            #FIXME: Not working when userId == profileUserId
+            postsSql = "SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id=NULL\
+                        UNION\
+                        SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s)"
+            
         else:
-            # Show all the public posts
-            pass
+            # Show all the public user posts and private mutual groups posts made by the profile user.
+            postsSql = "SELECT * FROM userModule_post WHERE posterId_id=%s AND privacy='P'\
+                        UNION\
+                        SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s)"
+
+        cursor.execute(postsSql, [profileUserId, profileUserId, mutualGroupSql, ])
+        posts = dictFetchAll(cursor)
         return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isSelf' : isSelf})
      
     return HttpResponseRedirect("/home")
@@ -55,17 +72,26 @@ def timeline(request, profileUserId):
 def newPost(request):
     userId = validateCookie(request)
     if userId:
-        form = PostForm(userId)
+        form = PostForm(user=userId)
         if request.method == 'POST':
-            form = PostForm(request.POST, userId)
+            form = PostForm(request.POST, user=userId)
             if form.is_valid():
                 content = request.POST.get('content')
                 privacy = request.POST.get('privacy')
                 group = request.POST.get('group')
-                #TODO:Check if the post is a group post and store the data in post table.
-                pass
-        return render(request, 'newpost.html', {'form': form})
+                cursor = connection.cursor()
+                sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content, groupId_id)\
+                       VALUES (%s, %s, %s, 0, 0, 0, %s, %s)"
+                if group == '-':
+                    #FIXME: Integerity error, not allowing NULL in groupId_id.
+                    cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, 'NULL', ]) 
+                else:
+                    cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, group, ])
+                return HttpResponseRedirect("/timeline/" + userId)
+            else:
+                 return  render(request, 'newpost.html', {'form': form})
 
+        return render(request, 'newpost.html', {'form': form})
     return HttpResponseRedirect("/home")
 
 # Add or delete a friend
