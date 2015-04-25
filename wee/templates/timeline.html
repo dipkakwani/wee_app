@@ -7,11 +7,11 @@
         <a href="friend.html">Add Friend</a>
         <br />
     {% endif %}
+    {{len}}<br />
     {% if posts %}
         {% for post in posts %}
-            {{post.posterId_id}}
             {% if post.groupId_id %}
-                posted in {{post.groupId_id}}
+                posted in {{post.groupName}} with id {{post.groupId_id}}
             {% endif %}   
             {{post.time}}
             <br />

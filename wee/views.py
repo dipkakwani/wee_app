@@ -48,23 +48,31 @@ def timeline(request, profileUserId):
         mutualGroupSql = "SELECT groupId_id FROM groupModule_joins j1\
                           WHERE EXISTS (SELECT groupId_id FROM groupModule_joins j2\
                           WHERE j1.userId_id=%s AND j2.userId_id=%s);"
-
+        
         if isFriend or (userId == profileUserId):
             # Show all the private and public user posts and the posts in mutual groups made by the profile user.
-            #FIXME: Not working when userId == profileUserId
-            postsSql = "SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id=NULL\
+            #FIXME: Group posts are not showing up.
+            postsSql = "(SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id is NULL)\
                         UNION\
-                        SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s)"
+                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s))"
             
         else:
             # Show all the public user posts and private mutual groups posts made by the profile user.
-            postsSql = "SELECT * FROM userModule_post WHERE posterId_id=%s AND privacy='P'\
+            postsSql = "(SELECT * FROM userModule_post WHERE posterId_id=%s AND privacy='P')\
                         UNION\
-                        SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s)"
+                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s))"
 
         cursor.execute(postsSql, [profileUserId, profileUserId, mutualGroupSql, ])
         posts = dictFetchAll(cursor)
-        return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isSelf' : isSelf})
+
+        # Fetch the group name (if any) from groupId_id to send to the template.
+        for post in posts:
+            post['groupName'] = ""
+            if post['groupId_id']:
+                groupNameSql = "SELECT groupName from groupModule_group where groupId=%s"
+                cursor.execute(groupNameSql, [post['groupId_id'], ])
+                post['groupName'] = cursor.fetchone()[0].encode('ascii')
+        return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isSelf' : isSelf, 'len' : len(posts)})
      
     return HttpResponseRedirect("/home")
 
@@ -80,16 +88,17 @@ def newPost(request):
                 privacy = request.POST.get('privacy')
                 group = request.POST.get('group')
                 cursor = connection.cursor()
-                sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content, groupId_id)\
-                       VALUES (%s, %s, %s, 0, 0, 0, %s, %s)"
+                
                 if group == '-':
-                    #FIXME: Integerity error, not allowing NULL in groupId_id.
-                    cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, 'NULL', ]) 
+                    sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content)\
+                           VALUES (%s, %s, %s, 0, 0, 0, %s)"
+                    cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, ]) 
                 else:
+                    sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content, groupId_id)\
+                           VALUES (%s, %s, %s, 0, 0, 0, %s, %s)"
                     cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, group, ])
+
                 return HttpResponseRedirect("/timeline/" + userId)
-            else:
-                 return  render(request, 'newpost.html', {'form': form})
 
         return render(request, 'newpost.html', {'form': form})
     return HttpResponseRedirect("/home")
