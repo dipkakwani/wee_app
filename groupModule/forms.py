@@ -6,7 +6,7 @@ from django.contrib.admin import widgets
 class GroupCreateForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ['groupName','groupType',]
+        fields = ['groupName','groupType','description']
 
 #class ViewAllGroups():
     

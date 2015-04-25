@@ -8,6 +8,7 @@ from wee.views import newPost
 from wee.views import timeline
 from wee.views import newsfeed
 from wee.views import friend
+from wee.views import notfound
 
 urlpatterns = patterns('',
     # Examples:
@@ -19,7 +20,8 @@ urlpatterns = patterns('',
     url(r'^logout/$', logout),
     url(r'^post/$', newPost),
     url(r'newgroup/', createGroup),
-    url(r'^group/(\d+)/$', group),
+    url(r'^group/(?P<groupId>\d+)/$', group),
     url(r'^timeline/(?P<profileUserId>\d+)/friend.html', friend),
     url(r'^timeline/(?P<profileUserId>\d+)/$', timeline),
+    url(r'^.*/$', notfound)
 )
