@@ -7,15 +7,16 @@
         <a href="friend.html">Add Friend</a>
         <br />
     {% endif %}
-    {{len}}<br />
+    Total posts {{len}}<br />
     {% if posts %}
         {% for post in posts %}
             {% if post.groupId_id %}
-                posted in {{post.groupName}} with id {{post.groupId_id}}
+                posted in group : <b>{{post.groupName}} </b>
             {% endif %}   
-            {{post.time}}
+            <b>{{post.time}}</b>
             <br />
             {{post.content}}
+            <br/>
             <br/>
         {% endfor %}
     {% else %}

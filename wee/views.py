@@ -45,24 +45,24 @@ def timeline(request, profileUserId):
         isSelf = 1 if userId == profileUserId else 0
         posts = {}
         # Fetch the mutual groupIds
-        mutualGroupSql = "SELECT groupId_id FROM groupModule_joins j1\
-                          WHERE EXISTS (SELECT groupId_id FROM groupModule_joins j2\
-                          WHERE j1.userId_id=%s AND j2.userId_id=%s);"
         
         if isFriend or (userId == profileUserId):
             # Show all the private and public user posts and the posts in mutual groups made by the profile user.
-            #FIXME: Group posts are not showing up.
-            postsSql = "(SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id is NULL)\
+            postsSql = "SELECT * FROM ((SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id is NULL)\
                         UNION\
-                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s))"
+                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (SELECT groupId_id FROM groupModule_joins j1\
+                          WHERE EXISTS (SELECT groupId_id FROM groupModule_joins j2\
+                          WHERE j1.userId_id=%s AND j2.userId_id=%s)))) temp ORDER BY time desc;"
             
         else:
             # Show all the public user posts and private mutual groups posts made by the profile user.
-            postsSql = "(SELECT * FROM userModule_post WHERE posterId_id=%s AND privacy='P')\
+            postsSql = "SELECT * FROM ((SELECT * FROM userModule_post WHERE posterId_id=%s AND privacy='P')\
                         UNION\
-                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (%s))"
+                        (SELECT * FROM userModule_post WHERE posterId_id=%s AND groupId_id IN (SELECT groupId_id FROM groupModule_joins j1\
+                          WHERE EXISTS (SELECT groupId_id FROM groupModule_joins j2\
+                          WHERE j1.userId_id=%s AND j2.userId_id=%s)))) temp ORDER BY time desc;"
 
-        cursor.execute(postsSql, [profileUserId, profileUserId, mutualGroupSql, ])
+        cursor.execute(postsSql, [profileUserId, profileUserId, profileUserId, profileUserId, ])
         posts = dictFetchAll(cursor)
 
         # Fetch the group name (if any) from groupId_id to send to the template.
