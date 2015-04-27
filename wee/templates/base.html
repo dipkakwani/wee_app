@@ -1,0 +1,58 @@
+<html>
+<head>
+<style>
+    body {
+        padding:0;
+        margin:0;
+    }
+    #navigation {
+        position:fixed;
+        top:0;
+        width:100%;
+        color:#ffffff;
+        height:35px;
+        text-align:center;
+        padding-top:15px;
+        -webkit-box-shadow: 0px 0px 8px 0px #000000;
+        -moz-box-shadow: 0px 0px 8px 0px #000000;
+        box-shadow: 0px 0px 8px 0px #000000; 
+        background-color: rgba(1, 1, 1, 0.8);
+        color: rgba(1, 1, 1, 0.8);
+    }
+    #navigation a {
+        font-size:16px;
+        padding-left:15px;
+        padding-right:15px;
+        color:white;
+        text-decoration:none;
+    }
+    #navigation a:hover {
+        color:grey;
+    }
+    #container {
+        width: 800px;
+        margin: 0 auto;
+    }
+</style>
+<title> 
+    {% block title %} {% endblock%}
+</title>
+</head>
+<body>
+<div id="navigation">
+        <a href="/newsfeed">Newsfeed</a>
+        <a href="">Timeline</a>
+        <a href="">Post</a>
+        <a href="">Search</a>
+        <a href="/friends">Friends</a>
+        <a href="/groups">Groups</a>
+        <a href="/settings">Settings</a>
+        <a href="/logout">Logout</a>
+</div>
+<br /><br/><br/><br />
+<div id="container">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>
