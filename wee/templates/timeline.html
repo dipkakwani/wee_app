@@ -1,5 +1,6 @@
-<html>
-<body>
+{% extends "base.html" %}
+{% block title %} Timeline {% endblock %}
+{% block content %}
     {% if isFriend %}
         <a href="friend.html">Remove Friend</a>
         <br/>
@@ -11,16 +12,15 @@
     {% if posts %}
         {% for post in posts %}
             {% if post.groupId_id %}
-                posted in group : <b>{{post.groupName}} </b>
+                Group : <b>{{post.groupName}} </b>
             {% endif %}   
-            <b>{{post.time}}</b>
+            {{post.time}}
             <br />
-            {{post.content}}
+            <b>{{post.content}}</b>
             <br/>
             <br/>
         {% endfor %}
     {% else %}
         No posts to show!
     {% endif %}
-</body>
-</html>
+{% endblock %}

@@ -39,7 +39,8 @@ def timeline(request, profileUserId):
             return HttpResponseRedirect("/notfound")
 
         #Check if the logged in user is a friend or not
-        friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR userA_id=%s AND userB_id=%s"
+        friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s AND status='A' OR\
+                     userA_id=%s AND userB_id=%s AND status='A'"
         cursor.execute(friendSql, [userId, profileUserId, profileUserId, userId, ])
         isFriend = cursor.fetchall()
         isSelf = 1 if userId == profileUserId else 0
@@ -128,6 +129,20 @@ def friend(request, profileUserId):
             cursor.execute(addSql, [userId, profileUserId, ])
     return HttpResponseRedirect("/timeline/" + profileUserId)
 
-    
+def searchString(request, queryString):
+    if not queryString:
+        return HttpResponseRedirect("/search")
+    cursor = connection.cursor()
+    searchUserSql = "SELECT name, userId FROM user WHERE name LIKE %s"
+    cursor.execute(searchSql, [queryString + '%', ])
+    searchResult = dictFetchAll(cursor)
+    searchGroupSql = "SELECT groupName, groupId FROM user WHERE groupName LIKE %s"
+    cursor.execute(searchGroupSql, [queryString + '%', ])
+    searchResult.append(dictFetchAll(cursor))
+    return render('search.html', {'searchResult' : searchResult})
+
+def search(request):
+    return render ('search.html')
+
 def notfound(request):
     return render(request,'notfound.html')
