@@ -22,5 +22,7 @@ A many-to-many relationship between User and Group
 class Joins(models.Model):
     groupId = models.ForeignKey('Group')
     userId = models.ForeignKey('userModule.User')
+    STATUS = (('P','Pending') , ('A' , 'Accepted'), )
+    status = models.CharField(max_length=1 , choices=STATUS)
     class Meta:
         unique_together = (('groupId'), ('userId'),)
