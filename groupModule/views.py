@@ -8,10 +8,6 @@ from django.forms.util import ErrorList
 
 # Create your views here.
 def createGroup(request):
-    #TODO: Define a view to create a group
-    #start with forms.py and the html file
-    #take help from userModule/forms.py and userModule/template/home.html and userModule/views.py
-    #remove these comments...
     userId=validateCookie(request)
     if not userId:
         return HttpResponseRedirect('/home/')

@@ -22,3 +22,6 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['content', 'privacy',]
+
+class SearchForm(forms.Form):
+    queryString = forms.CharField(max_length=64)

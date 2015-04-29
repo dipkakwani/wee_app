@@ -46,7 +46,7 @@ class User(models.Model):
 
     website = models.URLField(blank=True, default="")
 
-#NOTE:Django doesn't support composite primary key, so create a single compound unique key with Meta.unique_together .
+#NOTE:Django doesn't support composite primary key, so create a single composite unique key with Meta.unique_together .
 
 """
 A many-to-many relationship on User.
@@ -60,8 +60,10 @@ class Friendship(models.Model):
     status = models.CharField(max_length=1, choices=STATUS)
     class Meta:
         unique_together = (("userA"), ("userB"),)
-
-#A many-to-many relationship on User.
+"""
+A many-to-many relationship on User.
+UserA follows userB.
+"""
 class Following(models.Model):
     userA = models.ForeignKey('User', related_name='Following.userA')
     userB = models.ForeignKey('User', related_name='Following.userB')

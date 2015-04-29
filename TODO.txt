@@ -1,7 +1,6 @@
-Add other tables to userModule -- Done.
-Create views and templates for newsfeed, timeline, settings, logout(Done), createGroup, post.
 Modify home page template.
-Add cookies(Django Sessions) to remember which user has logged in -- Done.
-Create groupModule -- Done.
-Search users and groups.
-Let users join  groups.
+Let users join groups.
+Complete group page and group view.
+Add likes, comments and shares for a post.
+Add Friends page which should contain the list of friends and pending requests. Similary add a Groups page.
+Complete view and templates of user settings and group settings.

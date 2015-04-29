@@ -37,17 +37,25 @@
 <title> 
     {% block title %} {% endblock%}
 </title>
+<script type="text/javascript">
+    function userLink(elementId, userId) {
+        document.getElementById(elementId).href = "/timeline/" + userId;
+    }
+    function groupLink(elementId, groupId) {
+        document.getElementById(elementId).href = "/group/" + groupId;
+    }
+</script>
 </head>
 <body>
 <div id="navigation">
-        <a href="/newsfeed">Newsfeed</a>
-        <a href="">Timeline</a>
-        <a href="">Post</a>
-        <a href="">Search</a>
-        <a href="/friends">Friends</a>
-        <a href="/groups">Groups</a>
-        <a href="/settings">Settings</a>
-        <a href="/logout">Logout</a>
+        <a href="/newsfeed" id="nf">Newsfeed</a>
+        <a href="#" onclick="userLink('tl', {{userId}})" id="tl">Timeline</a>
+        <a href="/post" id="post">Post</a>
+        <a href="/search" id="search">Search</a>
+        <a href="/friends" id="friends">Friends</a>
+        <a href="/groups" id="groups">Groups</a>
+        <a href="/settings" id="settings">Settings</a>
+        <a href="/logout" id="logout">Logout</a>
 </div>
 <br /><br/><br/><br />
 <div id="container">

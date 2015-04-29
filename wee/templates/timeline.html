@@ -2,11 +2,19 @@
 {% block title %} Timeline {% endblock %}
 {% block content %}
     {% if isFriend %}
-        <a href="friend.html">Remove Friend</a>
+        <a href="friend">Remove Friend</a>
         <br/>
     {% elif not isSelf %}
-        <a href="friend.html">Add Friend</a>
+        <a href="friend">Add Friend</a>
         <br />
+        {% if isFollowing %}
+            <a href="following">Unfollow</a>
+            <br/>
+        {% else %}
+            <a href="following">Follow</a>
+            <br />
+        {% endif %}
+
     {% endif %}
     Total posts {{len}}<br />
     {% if posts %}
@@ -17,6 +25,10 @@
             {{post.time}}
             <br />
             <b>{{post.content}}</b>
+            <br />
+            <b>Likes </b> {{post.likes}}
+            <b> Comments </b> {{post.comments}}
+            <b> Shares </b> {{post.shares}}
             <br/>
             <br/>
         {% endfor %}

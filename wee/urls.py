@@ -5,11 +5,7 @@ from userModule.views import logout
 from groupModule.views import createGroup
 from groupModule.views import group
 from groupModule.views import groupSettings
-from wee.views import newPost
-from wee.views import timeline
-from wee.views import newsfeed
-from wee.views import friend
-from wee.views import notfound
+from wee.views import *
 
 urlpatterns = patterns('',
     # Examples:
@@ -18,12 +14,15 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^home/$', home),
+    url(r'^newsfeed/$', newsfeed),
     url(r'^logout/$', logout),
     url(r'^post/$', newPost),
     url(r'newgroup/', createGroup),
     url(r'^group/(?P<groupId>\d+)/$', group),
     url(r'^group/(?P<groupId>\d+)/settings$', groupSettings),
-    url(r'^timeline/(?P<profileUserId>\d+)/friend.html', friend),
+    url(r'^timeline/(?P<profileUserId>\d+)/friend', updateFriend),
+    url(r'^timeline/(?P<profileUserId>\d+)/follow', updateFollow),
     url(r'^timeline/(?P<profileUserId>\d+)/$', timeline),
-    url(r'^.*/$', notfound)
+    url(r'^search/$', search),
+    url(r'^.*/$', notfound),
 )

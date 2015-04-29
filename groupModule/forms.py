@@ -22,15 +22,15 @@ class GroupSettings(forms.ModelForm):
         groupId = kwargs.pop("group")
         super(GroupSettings, self).__init__(*args, **kwargs)
         cursor = connection.cursor()
-        memberssql = "SELECT userId_id FROM groupModule_joins WHERE groupId_id=%s and status='A'"
+        memberssql = "SELECT userId_id, name FROM groupModule_joins NATURAL JOIN userModule_user WHERE groupId_id=%s and status='A'"
         cursor.execute(memberssql , [groupId ,])
         GROUP_MEMBERS = cursor.fetchall()
         self.fields['removeMembers'] = forms.ChoiceField(choices=GROUP_MEMBERS)  #change to checkbox and handle the case of admin removing himself
-        pendingsql = "SELECT userId_id FROM groupModule_joins WHERE status='P'"
+        pendingsql = "SELECT userId_id, name FROM groupModule_joins NATURAL JOIN userModule_user WHERE status='P'"
         cursor.execute(pendingsql)
         PENDING_REQUEST = cursor.fetchall()
-        self.fields['pendingRequests'] = forms.CheckboxSelectMultiple(choices = PENDING_REQUEST)
-        groupTypeSql = "SELECT groupType FROM groupModule_group WHERE groupId=%s"
+        self.fields['pendingRequests'] = forms.ChoiceField(choices = PENDING_REQUEST)
+        groupTypeSql = "SELECT groupId, groupType FROM groupModule_group WHERE groupId=%s"
         cursor.execute(groupTypeSql , [groupId ,])
         GROUP_TYPE = cursor.fetchall()
         self.fields['groupType'] = forms.ChoiceField(choices=GROUP_TYPE)

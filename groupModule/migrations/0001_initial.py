@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
             name='Joins',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('status', models.CharField(max_length=1, choices=[(b'P', b'Pending'), (b'A', b'Accepted')])),
                 ('groupId', models.ForeignKey(to='groupModule.Group')),
             ],
             options={
