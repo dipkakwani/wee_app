@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% block title %} Search {% endblock %}
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    {{form}}
-    <input type="submit"/>
-</form>
+    <form method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit"/>
+    </form>
     {% if searchResult %}
         {% for result in searchResult %}
             {% if result.userId %}
-            User : <a href="#" id="user" onclick="userLink('user', {{result.userId}})">{{result.name}}</a>
+                USER : <a class="link" href={{result.link}}>{{result.name}}</a>
             {% elif result.groupId %}
-            Group : <a href="#" id="group" onclick="groupLink('group', {{result.groupId}})">{{result.groupName}}</a>
+                GROUP : <a class="link" href={{result.link}}>{{result.groupName}}</a>
             {% endif %}
+            <br />
         {% endfor %}
     {% endif %} 
 {% endblock %}

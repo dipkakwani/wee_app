@@ -8,11 +8,11 @@ import os
 
 #Returns the path of the profile picture
 def getImagePath(instance, filename):
-    return os.path.join('static/userModule/images', str(instance.userid), filename)
+    return os.path.join('../static/userModule/images', str(instance.userid), filename)
     
 #Returns the path of the default profile picture
 def defaultImage():
-    return os.path.join('static/userModule/images', 'default.png')
+    return os.path.join('../static/userModule/images', 'default.png')
 
 #Model storing the information of all the registered users.
 class User(models.Model):

@@ -33,16 +33,27 @@
         width: 800px;
         margin: 0 auto;
     }
+    .links {
+        text-decoration: none;
+        color: #000;        
+    }
+    .links:hover {
+        color: #A53AF2;
+    }
+    {% block css%}
+    {% endblock %}
 </style>
 <title> 
     {% block title %} {% endblock%}
 </title>
 <script type="text/javascript">
     function userLink(elementId, userId) {
-        document.getElementById(elementId).href = "/timeline/" + userId;
+        if (userId)
+            document.getElementById(elementId).href = "/timeline/" + userId;
     }
     function groupLink(elementId, groupId) {
-        document.getElementById(elementId).href = "/group/" + groupId;
+        if (groupId)
+            document.getElementById(elementId).href = "/group/" + groupId;
     }
 </script>
 </head>

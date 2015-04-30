@@ -3,6 +3,7 @@
 {% block content %}
 {% if posts %}
         {% for post in posts %}
+            <b>{{post.name}} </b>
             {% if post.groupId_id %}
                 Group : <b>{{post.groupName}} </b>
             {% endif %}   

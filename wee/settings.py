@@ -90,3 +90,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_PATH = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = (
+        #'/home/diptanshu/dbms/wee/wee/static',
+        STATIC_PATH, 
+)
+STATICFILES_FINDERS = (
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)

@@ -14,36 +14,46 @@ def dictFetchAll(cursor):
     desc = cursor.description
     return [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
+def dictFetchOne(cursor):
+    """Returns a single row from a cursor as a dict"""
+    desc = cursor.description
+    return dict(zip([col[0] for col in desc], cursor.fetchone()))
+
 def newsfeed(request):
     userId = validateCookie(request)    # Is the user logged in?
     if not userId:
         return HttpResponseRedirect("/home")
 
-    # Fetch the posts from friends, following users and groups.
-    postsSql = "SELECT * FROM userModule_post\
-                WHERE groupId_id IN (SELECT groupId_id FROM groupModule_joins WHERE userId_id=%s AND status='A')\
+    # Fetch the posts from user(currently logged in), friends, following users and groups.
+    postsSql = "SELECT * FROM userModule_post g1\
+                WHERE (SELECT g2.groupId_id FROM groupModule_joins g2 WHERE g1.groupId_id = g2.groupId_id AND userId_id=%s AND status='A')\
                 UNION\
-                SELECT * FROM userModule_post\
-                WHERE posterId_id IN\
-                    (SELECT userB_id FROM userModule_following WHERE userA_id=%s\
+                SELECT * FROM userModule_post u1\
+                WHERE\
+                    (SELECT userB_id FROM userModule_following WHERE userA_id=%s AND userB_id=u1.posterId_id\
                     UNION\
-                    SELECT userA_id FROM userModule_friendship WHERE userB_id=%s AND status='A'\
+                    SELECT userA_id FROM userModule_friendship WHERE userB_id=%s AND status='A' AND userA_id=u1.posterId_id\
                     UNION\
-                    SELECT userB_id FROM userModule_friendship WHERE userA_id=%s AND status='A')\
+                    SELECT userB_id FROM userModule_friendship WHERE userA_id=%s AND status='A' AND userB_id=u1.posterId_id\
+                    UNION\
+                    SELECT %s as userId FROM userModule_user where u1.posterId_id=%s LIMIT 1)\
                 ORDER BY time desc;"
     cursor = connection.cursor()
-    cursor.execute(postsSql, [userId, ] * 4)
+    cursor.execute(postsSql, [userId, ] * 6)
     posts = dictFetchAll(cursor)
     
-    # Fetch the group name (if any) from groupId_id to send to the template.
+    # Fetch the user name and group name (if any) from groupId_id to send to the template.
     for post in posts:
+        userSql = "SELECT name FROM userModule_user WHERE userId=%s"
+        cursor.execute(userSql, [post['posterId_id'], ])
+        post['name'] = cursor.fetchone()[0].encode('ascii')
         post['groupName'] = ""
         if post['groupId_id']:
             groupNameSql = "SELECT groupName from groupModule_group where groupId=%s"
             cursor.execute(groupNameSql, [post['groupId_id'], ])
             post['groupName'] = cursor.fetchone()[0].encode('ascii')
 
-    return render(request, 'newsfeed.html', {'posts' : posts})
+    return render(request, 'newsfeed.html', {'posts' : posts, 'userId' : userId, })
 
 def timeline(request, profileUserId):
     # Check which user is currently logged in. Only a logged in user can view other users' profile.
@@ -98,8 +108,20 @@ def timeline(request, profileUserId):
                 groupNameSql = "SELECT groupName from groupModule_group where groupId=%s"
                 cursor.execute(groupNameSql, [post['groupId_id'], ])
                 post['groupName'] = cursor.fetchone()[0].encode('ascii')
-        return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isFollowing': isFollowing, \
-                                                 'isSelf' : isSelf, 'len' : len(posts)})
+
+        # Fetch information of the user.
+        userInfoSql = "SELECT name, dob, sex, profilePic, school, college, companyName, status, profession, website\
+                       FROM userModule_user WHERE userId=%s"
+        cursor.execute(userInfoSql, [profileUserId, ])
+        user = dictFetchOne(cursor)
+        user['sex'] = "Male" if user['sex'] == 'M' else "Female"
+        if user['status'] == "M":
+            user['status'] = "Married"
+        elif user['status'] == "U":
+            user['status'] = "Unmarried"
+
+        return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isFollowing': isFollowing,\
+                'isSelf' : isSelf, 'len' : len(posts), 'userId': userId, 'user' : user, })
      
     return HttpResponseRedirect("/home")
 
@@ -127,7 +149,7 @@ def newPost(request):
 
                 return HttpResponseRedirect("/timeline/" + userId)
 
-        return render(request, 'newpost.html', {'form': form})
+        return render(request, 'newpost.html', {'form': form, 'userId' : userId})
     return HttpResponseRedirect("/home")
 
 # Add or delete a friend
@@ -194,8 +216,13 @@ def search(request):
             searchResult = dictFetchAll(cursor)
             searchGroupSql = "SELECT groupName, groupId FROM groupModule_group WHERE groupName LIKE %s"
             cursor.execute(searchGroupSql, [queryString + '%', ])
-            searchResult.append(dictFetchAll(cursor))
-            return render(request, 'search.html', {'searchResult' : searchResult, 'userId' : userId, })
+            searchResult += dictFetchAll(cursor)
+            for result in searchResult:
+                if 'userId' in result:
+                    result['link'] = "/timeline/" + str(result['userId'])
+                else:
+                    result['link'] = "/group/" + str(result['groupId'])
+            return render(request, 'search.html', {'searchResult' : searchResult, 'userId' : userId, 'form' : form, })
 
     return render(request, 'search.html', {'form' : form, 'userId' : userId, })
 
