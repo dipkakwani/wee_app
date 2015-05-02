@@ -4,6 +4,7 @@ from userModule.views import home
 from userModule.views import logout
 from groupModule.views import createGroup
 from groupModule.views import group
+from groupModule.views import selectgroup
 from groupModule.views import groupSettings
 from wee.views import *
 
@@ -19,7 +20,8 @@ urlpatterns = patterns('',
     url(r'^post/$', newPost),
     url(r'newgroup/', createGroup),
     url(r'^group/(?P<groupId>\d+)/$', group),
-    url(r'^group/(?P<groupId>\d+)/settings$', groupSettings),
+    url(r'^groups/' , selectgroup) ,
+    url(r'^group/(?P<groupId>\d+)/settings/$', groupSettings),
     url(r'^timeline/(?P<profileUserId>\d+)/friend', updateFriend),
     url(r'^timeline/(?P<profileUserId>\d+)/follow', updateFollow),
     url(r'^timeline/(?P<profileUserId>\d+)/$', timeline),

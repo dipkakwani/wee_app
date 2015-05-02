@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %} Select Group {% endblock %}
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <b>Select any group</b>
+        {{groups}}
+        <input type = "submit" name = "Select" />
+    </form>
+    <a href="/newgroup">Create new Group</a>
+{% endblock %}

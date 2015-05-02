@@ -1,13 +1,10 @@
-<html>
-<head>
-    <title>New Group</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %} New Group {% endblock %}
+{% block content %}
     <h1>Create new Group</h1>
     <form action="" method="post">
         {% csrf_token %}
         {{GroupCreateForm.as_p}}
         <input type="submit" name="submitGroup" />
     </form>
-</body>
-</html>
+{% endblock %}

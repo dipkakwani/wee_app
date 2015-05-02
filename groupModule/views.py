@@ -1,12 +1,18 @@
 from django.shortcuts import render
 from groupModule.forms import GroupCreateForm
 from groupModule.forms import GroupSettings
+from groupModule.forms import Groups
 from django.db import connection
 from userModule.security import *
 from django.http import HttpResponseRedirect
 from django.forms.util import ErrorList
 
 # Create your views here.
+def dictFetchAll(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
+
 def createGroup(request):
     userId=validateCookie(request)
     if not userId:
@@ -44,18 +50,19 @@ def group(request,groupId):
     group_checksql = "SELECT 1 FROM groupModule_joins where groupId_id=%s and userId_id=%s"
     cursor.execute(group_checksql,[groupId , userId ,])
     samegroup_check = cursor.fetchall()
-    memberssql = "SELECT userId_id FROM groupModule_joins where groupId_id=%s"
+    #dirty query!!!make it clean
+    memberssql = "SELECT j.userId_id, u.name FROM groupModule_joins j,userModule_user u WHERE j.groupId_id=%s and j.status='A' and j.userId_id=u.userId"
     cursor.execute(memberssql,[groupId ,])
     groupmembers = cursor.fetchall()
     postsql = ""
     if samegroup_check:
         #queries to be modified later
-        postsql = "SELECT postId,time,likes,comments,shares,content,posterId_id from userModule_post where groupId_id=%s"      
+        postsql = "SELECT * from userModule_post where groupId_id=%s"      
     else:
         #queries to be modified later
-        postsql = "SELECT postId,time,likes,comments,shares,content,posterId_id from userModule_post where groupId_id=%s and privacy='O'"
+        postsql = "SELECT * from userModule_post where groupId_id=%s and privacy='O'"
     cursor.execute(postsql,[groupId,])
-    posts = cursor.fetchall()         #make it fetch only the top few posts later
+    posts = dictFetchAll(cursor)         #make it fetch only the top few posts later
     return render(request, 'grouppage.html', {'groupname':groupname , 'posts':posts , 'members':groupmembers})
 
     
@@ -67,7 +74,7 @@ def groupSettings(request,groupId):
     valid_group_or_person = cursor.fetchall()
     if not valid_group_or_person:
         return HttpResponseRedirect('/notfound')
-    gsettings = GroupSettings(group=groupId)
+    gsettings = GroupSettings(group = groupId)
     if request.method == 'POST' :
         gsettings = GroupSettings(request.POST , group=groupId)
         if gsettings.is_valid():
@@ -95,3 +102,15 @@ def groupSettings(request,groupId):
             cursor.execute(groupEditsql , [groupType , description , groupId ,])
             return HttpResponseRedirect('/group/%s/settings'%(groupId))
     return render(request, 'groupsettings.html', {'groupsettings':gsettings})
+
+    
+def selectgroup(request):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    selgroups = Groups(user = userId)
+    if request.method == 'POST' :
+        selgroups = Groups(request.POST , user = userId)
+        GroupId = request.POST.get('Groups')
+        return HttpResponseRedirect('/group/' + GroupId)
+    return render(request, 'groupselect.html', {'groups':selgroups})
