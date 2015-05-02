@@ -37,6 +37,39 @@ def createGroup(request):
             
     return render(request, 'creategroup.html', {'GroupCreateForm' : creategroup,})
     
+def leavegroup(groupId , userId):
+    cursor = connection.cursor()
+    removesql = "DELETE FROM groupModule_joins WHERE groupId_id=%s and userId_id=%s"
+    cursor.execute(removesql , [groupId , userId ,])
+    
+    checkmemberssql = "SELECT userId_id FROM groupModule_joins WHERE groupId_id=%s"
+    cursor.execute(checkmemberssql , [groupId ,])
+    checkmembers = cursor.fetchall()
+    
+    if not checkmembers:
+        removecommentsql = "DELETE FROM userModule_like WHERE postId_id IN (SELECT postId FROM userModule_post WHERE groupId_id=%s)"
+        cursor.execute(removecommentsql , [groupId ,])
+        
+        removecommentsql = "DELETE FROM userModule_share WHERE postId_id IN (SELECT postId FROM userModule_post WHERE groupId_id=%s)"
+        cursor.execute(removecommentsql , [groupId ,])
+        
+        removecommentsql = "DELETE FROM userModule_comment WHERE postId_id IN (SELECT postId FROM userModule_post WHERE groupId_id=%s)"
+        cursor.execute(removecommentsql , [groupId ,])
+        
+        removepostsql = "DELETE FROM userModule_post WHERE groupId_id=%s"
+        cursor.execute(removepostsql , [groupId ,])
+        
+        removegroupsql = "DELETE FROM groupModule_group WHERE groupId=%s"
+        cursor.execute(removegroupsql , [groupId ,])
+    else:
+        adminchecksql = "SELECT 1 FROM groupModule_group WHERE groupId=%s and adminId_id=%s"
+        cursor.execute(adminchecksql , [groupId , userId ,])
+        admincheck = cursor.fetchall()
+        if admincheck:
+            newAdmin = checkmembers[0][0]
+            changeadminsql = "UPDATE groupModule_group SET adminId_id=%s WHERE groupId=%s"
+            cursor.execute(changeadminsql , [newAdmin , groupId ,])
+        
     
 def group(request,groupId):
     userId = validateCookie(request)
@@ -44,16 +77,24 @@ def group(request,groupId):
     cursor = connection.cursor()
     cursor.execute(groupsql,[groupId ,])
     groupexists = cursor.fetchall()
+    
     if not groupexists:
         return HttpResponseRedirect('/notfound')
+    
+    if request.method == 'POST':
+        leavegroup(groupId,userId)
+        return render(request , 'leaveGroup.html')
+    
     groupname = groupexists[0][0]  #the tuple containing group name
     group_checksql = "SELECT 1 FROM groupModule_joins where groupId_id=%s and userId_id=%s"
     cursor.execute(group_checksql,[groupId , userId ,])
     samegroup_check = cursor.fetchall()
+    
     #dirty query!!!make it clean
     memberssql = "SELECT j.userId_id, u.name FROM groupModule_joins j,userModule_user u WHERE j.groupId_id=%s and j.status='A' and j.userId_id=u.userId"
     cursor.execute(memberssql,[groupId ,])
     groupmembers = cursor.fetchall()
+    
     postsql = ""
     if samegroup_check:
         #queries to be modified later
@@ -62,8 +103,9 @@ def group(request,groupId):
         #queries to be modified later
         postsql = "SELECT * from userModule_post where groupId_id=%s and privacy='O'"
     cursor.execute(postsql,[groupId,])
-    posts = dictFetchAll(cursor)         #make it fetch only the top few posts later
-    return render(request, 'grouppage.html', {'groupname':groupname , 'posts':posts , 'members':groupmembers})
+    posts = dictFetchAll(cursor)       #make it fetch only the top few posts later
+    
+    return render(request, 'grouppage.html', {'groupname':groupname , 'posts':posts , 'members':groupmembers , 'samegroup':samegroup_check})
 
     
 def groupSettings(request,groupId):

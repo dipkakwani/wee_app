@@ -1,8 +1,32 @@
-<html>
-<head>
-    <title>{{groupname}}</title>
-</head>
-<body>
-    <!--Group posts here--> 
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %} {{groupname}} {% endblock %}
+{% block content %}
+{% if posts %}
+    {% for post in posts %}
+        {{post.time}}
+        <br />
+        <b>Post: </b>{{post.content}}
+        <br />
+        <b>Likes </b> {{post.likes}}
+        <b> Comments </b> {{post.comments}}
+        <b> Shares </b> {{post.shares}}
+        <br/>
+        <br/>
+    {% endfor %}
+    <br />
+    <h2>Group Members :</h2>
+    <br />
+    {% for member in members %}
+        {{member.1}}
+        <br />
+    {% endfor %}
+{% else %}
+    No Group posts to show!
+{% if samegroup %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Leave Group" />
+    </form>
+{% endif %}
+{% endif %}
+{% endblock %}
