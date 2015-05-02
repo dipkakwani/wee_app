@@ -44,9 +44,9 @@ def leavegroup(groupId , userId):
     
     checkmemberssql = "SELECT userId_id FROM groupModule_joins WHERE groupId_id=%s"
     cursor.execute(checkmemberssql , [groupId ,])
-    checkmembers = cursor.fetchall()
+    checkMembers = cursor.fetchall()
     
-    if not checkmembers:
+    if not checkMembers:
         removecommentsql = "DELETE FROM userModule_like WHERE postId_id IN (SELECT postId FROM userModule_post WHERE groupId_id=%s)"
         cursor.execute(removecommentsql , [groupId ,])
         
@@ -66,10 +66,26 @@ def leavegroup(groupId , userId):
         cursor.execute(adminchecksql , [groupId , userId ,])
         admincheck = cursor.fetchall()
         if admincheck:
-            newAdmin = checkmembers[0][0]
+            newAdmin = checkMembers[0][0]
             changeadminsql = "UPDATE groupModule_group SET adminId_id=%s WHERE groupId=%s"
             cursor.execute(changeadminsql , [newAdmin , groupId ,])
-        
+
+def joingroup(groupId,userId):
+    cursor = connection.cursor()
+    #check if user is already part of group (in case a wrong request is sent)
+    checksql = "SELECT 1 FROM groupModule_joins WHERE groupId_id=%s and userId_id=%s"
+    cursor.execute(checksql , [groupId , userId ,])
+    checkredundancy = cursor.fetchall()
+    if not checkredundancy:
+        groupTypesql = "SELECT groupType FROM groupModule_group WHERE groupId=%s"
+        cursor.execute(groupTypesql , [groupId ,])
+        groupType = cursor.fetchall()
+        if groupType[0][0] == 'O' :
+            joinsql = "INSERT INTO groupModule_joins (groupId_id,userId_id,status) VALUES (%s,%s,%s)"
+            cursor.execute(joinsql , [groupId,userId,'A'])
+        else:
+            joinsql = "INSERT INTO groupModule_joins (groupId_id,userId_id,status) VALUES (%s,%s,%s)"
+            cursor.execute(joinsql , [groupId,userId,'P'])
     
 def group(request,groupId):
     userId = validateCookie(request)
@@ -82,8 +98,12 @@ def group(request,groupId):
         return HttpResponseRedirect('/notfound')
     
     if request.method == 'POST':
-        leavegroup(groupId,userId)
-        return render(request , 'leaveGroup.html')
+        if 'LeaveGroup' in request.POST:
+            leavegroup(groupId,userId)
+            return render(request , 'leaveGroup.html')
+        elif 'JoinGroup' in request.POST:
+            joingroup(groupId,userId)
+            return HttpResponseRedirect('/group/'+str(groupId))
     
     groupname = groupexists[0][0]  #the tuple containing group name
     group_checksql = "SELECT 1 FROM groupModule_joins where groupId_id=%s and userId_id=%s"
@@ -98,10 +118,10 @@ def group(request,groupId):
     postsql = ""
     if samegroup_check:
         #queries to be modified later
-        postsql = "SELECT * from userModule_post where groupId_id=%s"      
+        postsql = "SELECT * FROM userModule_post JOIN userModule_user ON posterId_id=userId WHERE groupId_id=%s"      
     else:
         #queries to be modified later
-        postsql = "SELECT * from userModule_post where groupId_id=%s and privacy='O'"
+        postsql = "SELECT * FROM userModule_post JOIN userModule_user ON posterId_id=userId WHERE groupId_id=%s and privacy='P'"
     cursor.execute(postsql,[groupId,])
     posts = dictFetchAll(cursor)       #make it fetch only the top few posts later
     
@@ -142,7 +162,7 @@ def groupSettings(request,groupId):
             cursor.execute(deletesql , [deleteMember , ])
             groupEditsql = "UPDATE groupModule_group SET groupType=%s and description=%s where groupId=%s"
             cursor.execute(groupEditsql , [groupType , description , groupId ,])
-            return HttpResponseRedirect('/group/%s/settings'%(groupId))
+            return HttpResponseRedirect('/group/%s/settings/'%(groupId))
     return render(request, 'groupsettings.html', {'groupsettings':gsettings})
 
     
@@ -153,6 +173,8 @@ def selectgroup(request):
     selgroups = Groups(user = userId)
     if request.method == 'POST' :
         selgroups = Groups(request.POST , user = userId)
-        GroupId = request.POST.get('Groups')
-        return HttpResponseRedirect('/group/' + GroupId)
+        if selgroups.is_valid():
+            GroupId = request.POST.get('Groups')
+            return HttpResponseRedirect('/group/' + GroupId)
     return render(request, 'groupselect.html', {'groups':selgroups})
+ 

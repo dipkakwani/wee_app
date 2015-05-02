@@ -5,7 +5,7 @@
     {% for post in posts %}
         {{post.time}}
         <br />
-        <b>Post: </b>{{post.content}}
+        <b>{{post.name}}: </b>{{post.content}}
         <br />
         <b>Likes </b> {{post.likes}}
         <b> Comments </b> {{post.comments}}
@@ -22,11 +22,16 @@
     {% endfor %}
 {% else %}
     No Group posts to show!
+{% endif %}
 {% if samegroup %}
     <form action="" method="post">
         {% csrf_token %}
-        <input type="submit" value="Leave Group" />
+        <input type="submit" value="Leave Group" name="LeaveGroup" />
     </form>
-{% endif %}
+{% else %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Join Group" name="JoinGroup" />
+    </form>
 {% endif %}
 {% endblock %}
