@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('commentId', models.AutoField(serialize=False, primary_key=True)),
                 ('content', models.CharField(max_length=140)),
             ],
             options={
@@ -176,9 +176,5 @@ class Migration(migrations.Migration):
             name='userId',
             field=models.ForeignKey(related_name='Comment.userId', to='userModule.User'),
             preserve_default=True,
-        ),
-        migrations.AlterUniqueTogether(
-            name='comment',
-            unique_together=set([('userId', 'postId')]),
         ),
     ]

@@ -1,0 +1,12 @@
+<html>
+{% if users %}
+    {% for user in users%}
+        <a href="/timeline/{{user.userId}}">{{user.name}}</a> <br />
+        {% if user.content %}
+            <b>{{user.content}}</b> <br />
+        {% endif %}
+    {% endfor %}
+{% else %}
+    No activity on this post!
+{% endif %}
+</html>

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.admin import widgets
 from django.db import connection
 from userModule.models import Post
+from userModule.models import Comment
 from groupModule.models import Joins
 from groupModule.models import Group
 
@@ -14,7 +15,7 @@ class PostForm(forms.ModelForm):
         userId = kwargs.pop("user")
         super(PostForm, self).__init__(*args, **kwargs)
         groups = (('-', '-------'), )
-        sqlGroup = "SELECT distinct groupId, groupName FROM groupModule_group NATURAL JOIN groupModule_joins WHERE userId_id=%s;"
+        sqlGroup = "SELECT distinct groupId, groupName FROM groupModule_group RIGHT JOIN groupModule_joins ON groupId_id=groupId WHERE userId_id=%s;"
         cursor = connection.cursor()
         cursor.execute(sqlGroup, [userId, ])
         groups += cursor.fetchall()
@@ -25,3 +26,8 @@ class PostForm(forms.ModelForm):
 
 class SearchForm(forms.Form):
     queryString = forms.CharField(max_length=64)
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content', ]

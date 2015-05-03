@@ -41,6 +41,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'userModule',
     'groupModule',
+    'django_faker', 
+    'autofixture', 
 )
 
 MIDDLEWARE_CLASSES = (
@@ -99,3 +101,5 @@ STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+FAKER_LOCALE = None     # settings.LANGUAGE_CODE is loaded
+FAKER_PROVIDERS = None  # faker.DEFAULT_PROVIDERS is loaded (all)

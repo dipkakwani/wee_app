@@ -10,6 +10,7 @@ from userModule.forms import LoginForm
 from userModule.forms import SettingsForm
 from django.forms.util import ErrorList
 from userModule.models import User
+
 from security import *
 import os
 
@@ -31,7 +32,7 @@ def home(request):
                 dob = request.POST.get('dob')
                 sex = request.POST.get('sex')
                 h = hashPassword(name, password)
-                profilePic = os.path.join('../static/userModule/images', 'default.png')
+                profilePic = '/static/userModule/default.png'
 
                 #NOTE:1.When using raw SQL Queries, you have to give the default values explicitly. 
                 #     2.Always write raw sql queries as written below to escape strings and prevent SQL injection.
