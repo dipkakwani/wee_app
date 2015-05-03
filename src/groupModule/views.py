@@ -170,7 +170,7 @@ def groupSettings(request,groupId):
                 errors.append(u"You cannot remove yourself from the group")
             deletesql = "DELETE FROM groupModule_joins WHERE userId_id=%s"
             cursor.execute(deletesql , [deleteMember , ])
-            groupEditsql = "UPDATE groupModule_group SET groupType=%s and description=%s where groupId=%s"
+            groupEditsql = "UPDATE groupModule_group SET groupType=%s, description=%s where groupId=%s"
             cursor.execute(groupEditsql , [groupType , description , groupId ,])
             return HttpResponseRedirect('/group/%s/settings/'%(groupId))
     return render(request, 'groupsettings.html', {'groupsettings':gsettings})

@@ -41,8 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'userModule',
     'groupModule',
-    'django_faker', 
-    'autofixture', 
+    'autofixture',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -67,10 +66,10 @@ WSGI_APPLICATION = 'wee.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'wee',                      
-        'USER': 'root',                      
-        'PASSWORD': 'root',                  
-        'HOST': 'localhost',                      
+        'NAME': 'wee',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }
@@ -95,11 +94,14 @@ STATIC_URL = '/static/'
 STATIC_PATH = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (
         #'/home/diptanshu/dbms/wee/wee/static',
-        STATIC_PATH, 
+        STATIC_PATH,
 )
 STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-FAKER_LOCALE = None     # settings.LANGUAGE_CODE is loaded
-FAKER_PROVIDERS = None  # faker.DEFAULT_PROVIDERS is loaded (all)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+
+defaultProfilePic = '/static/userModule/default.png'

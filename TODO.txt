@@ -1,6 +1,8 @@
-Modify home page template.
-Let users join groups.
-Complete group page and group view.
-Add likes, comments and shares for a post.
-Add Friends page which should contain the list of friends and pending requests. Similary add a Groups page.
-Complete view and templates of user settings and group settings.
+Modify design of home page template.
+Add AJAX for likes, comments and shares for a post.
+Complete documentation.
+
+---- Advanced TODO tasks ----
+Add friend recommendation.
+Add real time notifications.
+Add messages.

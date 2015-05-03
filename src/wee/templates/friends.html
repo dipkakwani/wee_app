@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %} Friends {% endblock %}
+{% block content %}
+    <b>Friend Request </b><br/>
+    {% if friendRequests%}
+        {% for user in friendRequests %}
+            <a href="/timeline/{{user.userId}}" class="link">{{user.name}}</a> <br />
+            <a href="/timeline/{{user.userId}}/A/friend" class="link">Accept</a> 
+            <a href="/timeline/{{user.userId}}/D/friend" class="link">Ignore</a><br /> <br />
+        {% endfor %}
+    {% else %}
+    No new friend requests! <br /> <br />
+    {% endif %}
+    <b>Friends</b> <br/>
+    Friends count {{friendsCount}} <br /> <br />
+    {% if friendsList %}
+        {% for friend in friendsList %}
+             <a href="/timeline/{{friend.userId}}" class="link">{{friend.name}}</a> <br />
+             <a href="/timeline/{{friend.userId}}/D/friend" class="link">Remove Friend</a> <br / > <br /> 
+        {% endfor %}
+    {% else %}
+        You have no friends! <a href="/search" class="link">Search users to add friends</a>
+    {% endif %}
+{% endblock %}

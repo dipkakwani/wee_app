@@ -3,7 +3,10 @@
     #info {
         text-align:right;
         position: fixed;
-        right: 15%;
+        right: 10%;
+    }
+    #posts {
+        width: 600px;
     }
 
 {% endblock %}
@@ -12,16 +15,16 @@
 {% block content %}
 <div id="info">
     {% if isFriend or friendRequest %}
-        <a class="link" href="friend">Remove Friend</a>
+        <a class="link" href="D/friend">Remove Friend</a>
         <br/>
     {% elif not isSelf %}
-        <a class="link" href="friend">Add Friend</a>
+        <a class="link" href="A/friend">Add Friend</a>
         <br />
         {% if isFollowing %}
-            <a class="link" href="following">Unfollow</a>
+            <a class="link" href="follow">Unfollow</a>
             <br/>
         {% else %}
-            <a class="link" href="following">Follow</a>
+            <a class="link" href="follow">Follow</a>
             <br />
         {% endif %}
 
@@ -30,7 +33,11 @@
     User Info <br/>
     Name : <b>{{user.name}}</b> <br /> 
     DOB : <b>{{user.dob}}</b> <br />
-    <img src="{% static "userModule/default.png"%}" height=80px; width=80px;/> <br />
+        {% if user.profilePic == '/static/userModule/default.png'%}
+            <img src="{% static "userModule/default.png"%}" height=80px; width=80px;/> <br />
+        {% else %}
+        <img src="{{MEDIA_URL}}{{user.profilePic}}" height=80px; width=80px;/> <br />
+        {% endif %}
     Sex : <b>{{user.sex}} </b><br />
     {% if user.school %}
         School : <b>{{user.school}} </b><br />
@@ -42,7 +49,12 @@
         Company : <b>{{user.companyName}} </b><br />
     {% endif %}
     {% if user.status %}
-        Status : <b>{{user.status}} </b><br />
+    Status : 
+        {% if user.status == 'S'%}
+            <b>Single</b><br />
+        {% else %}
+            <b>Married</b><br />
+        {% endif %}
     {% endif %}
     {% if user.profession %}
         Profession : <b>{{user.profession}} </b><br />
@@ -65,7 +77,7 @@
             <a href="/like/{{post.postId}}" class="link">
                 Like
             </a> 
-            <a href="/getlike/{{post.postId}}">
+            <a href="/getlike/{{post.postId}}" class="link">
                 ({{post.likes}})
             </a>
             <a href="/comment/{{post.postId}}" class="link">

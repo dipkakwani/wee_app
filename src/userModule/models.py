@@ -8,7 +8,7 @@ import os
 
 #Returns the path of the profile picture
 def getImagePath(instance, filename):
-    return os.path.join('/static/userModule/images', str(instance.userid), filename)
+    return os.path.join('/media/userModule/images', str(instance.userId), filename)
     
 #Returns the path of the default profile picture
 def defaultImage():
