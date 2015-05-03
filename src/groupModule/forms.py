@@ -38,7 +38,7 @@ class GroupSettings(forms.Form):
         GROUPTYPE = (('O', 'Open'), ('C', 'Closed'),)
         groupTypeSql = "SELECT groupType,CASE groupType WHEN 'O' THEN 'Open' ELSE 'Closed' END FROM groupModule_group WHERE groupId=%s"
         cursor.execute(groupTypeSql , [groupId ,])
-        GROUP_TYPE = cursor.fetchall()
+        GROUP_TYPE = cursor.fetchone()[0].encode('ascii')
         self.fields['groupType'] = forms.ChoiceField(choices=GROUPTYPE,initial=GROUP_TYPE)
         
         groupDescriptionsql = "SELECT description FROM groupModule_group WHERE groupId=%s"
