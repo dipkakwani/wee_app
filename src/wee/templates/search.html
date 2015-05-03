@@ -9,9 +9,9 @@
     {% if searchResult %}
         {% for result in searchResult %}
             {% if result.userId %}
-                USER : <a class="link" href={{result.link}}>{{result.name}}</a>
+                USER : <a class="link" href="/timeline/{{result.userId}}">{{result.name}}</a>
             {% elif result.groupId %}
-                GROUP : <a class="link" href={{result.link}}>{{result.groupName}}</a>
+                GROUP : <a class="link" href="/group/{{result.groupId}}">{{result.groupName}}</a>
             {% endif %}
             <br />
         {% endfor %}

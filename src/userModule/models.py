@@ -8,11 +8,11 @@ import os
 
 #Returns the path of the profile picture
 def getImagePath(instance, filename):
-    return os.path.join('../static/userModule/images', str(instance.userid), filename)
+    return os.path.join('/static/userModule/images', str(instance.userid), filename)
     
 #Returns the path of the default profile picture
 def defaultImage():
-    return os.path.join('../static/userModule/images', 'default.png')
+    return os.path.join('/static/userModule/images', 'default.png')
 
 #Model storing the information of all the registered users.
 class User(models.Model):
@@ -102,8 +102,7 @@ class Like(models.Model):
         unique_together = (('userId'), ("postId"),)    
 
 class Comment(models.Model):
+    commentId = models.AutoField(primary_key=True)
     userId = models.ForeignKey('User', related_name='Comment.userId')
     postId = models.ForeignKey('Post', related_name='Comment.postId')
     content = models.CharField(max_length=140)
-    class Meta:
-        unique_together = (('userId'), ("postId"),)

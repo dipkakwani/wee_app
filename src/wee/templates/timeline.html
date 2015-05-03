@@ -11,17 +11,17 @@
 {% load staticfiles %}
 {% block content %}
 <div id="info">
-    {% if isFriend %}
-        <a class="links" href="friend">Remove Friend</a>
+    {% if isFriend or friendRequest %}
+        <a class="link" href="friend">Remove Friend</a>
         <br/>
     {% elif not isSelf %}
-        <a class="links" href="friend">Add Friend</a>
+        <a class="link" href="friend">Add Friend</a>
         <br />
         {% if isFollowing %}
-            <a class="links" href="following">Unfollow</a>
+            <a class="link" href="following">Unfollow</a>
             <br/>
         {% else %}
-            <a class="links" href="following">Follow</a>
+            <a class="link" href="following">Follow</a>
             <br />
         {% endif %}
 
@@ -62,9 +62,22 @@
             <br />
             <b>{{post.content}}</b>
             <br />
-            <b>Likes </b> {{post.likes}}
-            <b> Comments </b> {{post.comments}}
-            <b> Shares </b> {{post.shares}}
+            <a href="/like/{{post.postId}}" class="link">
+                Like
+            </a> 
+            <a href="/getlike/{{post.postId}}">
+                ({{post.likes}})
+            </a>
+            <a href="/comment/{{post.postId}}" class="link">
+                Comment
+            </a>
+            <a href="/getcomment/{{post.postId}}" class="link">
+                ({{post.comments}})
+            </a>
+            <a href="/share/{{post.postId}}" class="link">
+                Share
+            </a> 
+                ({{post.shares}})
             <br/>
             <br/>
         {% endfor %}

@@ -30,7 +30,7 @@ def newsfeed(request):
                 UNION\
                 SELECT * FROM userModule_post u1\
                 WHERE\
-                    (SELECT userB_id FROM userModule_following WHERE userA_id=%s AND userB_id=u1.posterId_id\
+                    (SELECT userB_id FROM userModule_following WHERE userA_id=%s AND userB_id=u1.posterId_id AND u1.privacy='P'\
                     UNION\
                     SELECT userA_id FROM userModule_friendship WHERE userB_id=%s AND status='A' AND userA_id=u1.posterId_id\
                     UNION\
@@ -38,6 +38,7 @@ def newsfeed(request):
                     UNION\
                     SELECT %s as userId FROM userModule_user where u1.posterId_id=%s LIMIT 1)\
                 ORDER BY time desc;"
+    #FIXME: Add likes and comments made by friends on public posts which are not posted by friends. Ineffecient query, will replace it with new one in next commit
     cursor = connection.cursor()
     cursor.execute(postsSql, [userId, ] * 6)
     posts = dictFetchAll(cursor)
@@ -68,11 +69,20 @@ def timeline(request, profileUserId):
         if not isUser:
             return HttpResponseRedirect("/notfound")
 
-        # Check if the user is friend (including pending friend request) or not.
-        friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR\
-                     userA_id=%s AND userB_id=%s"
+        # Check if the user is friend or not.
+        friendSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s AND status='A'OR\
+                     userA_id=%s AND userB_id=%s AND status='A'"
         cursor.execute(friendSql, [userId, profileUserId, profileUserId, userId, ])
         isFriend = cursor.fetchall()
+    
+        # Check if the user has sent friend request
+        if not isFriend:
+            friendRequestSql = "SELECT 1 FROM userModule_friendship WHERE userA_id=%s AND userB_id=%s OR\
+                                userA_id=%s AND userB_id=%s"
+            cursor.execute(friendRequestSql, [userId, profileUserId, profileUserId, userId, ])
+            friendRequest = cursor.fetchall()
+        else:
+            friendRequest = ()
 
         # Check if the logged in user is following the profileUser 
         followingSql = "SELECT 1 FROM userModule_following WHERE userA_id=%s AND userB_id=%s"
@@ -121,7 +131,7 @@ def timeline(request, profileUserId):
             user['status'] = "Unmarried"
 
         return render(request, 'timeline.html', {'posts' : posts, 'isFriend' : isFriend , 'isFollowing': isFollowing,\
-                'isSelf' : isSelf, 'len' : len(posts), 'userId': userId, 'user' : user, })
+                'isSelf' : isSelf, 'len' : len(posts), 'userId': userId, 'user' : user, 'friendRequest' : friendRequest})
      
     return HttpResponseRedirect("/home")
 
@@ -217,14 +227,108 @@ def search(request):
             searchGroupSql = "SELECT groupName, groupId FROM groupModule_group WHERE groupName LIKE %s"
             cursor.execute(searchGroupSql, [queryString + '%', ])
             searchResult += dictFetchAll(cursor)
-            for result in searchResult:
-                if 'userId' in result:
-                    result['link'] = "/timeline/" + str(result['userId'])
-                else:
-                    result['link'] = "/group/" + str(result['groupId'])
+
             return render(request, 'search.html', {'searchResult' : searchResult, 'userId' : userId, 'form' : form, })
 
     return render(request, 'search.html', {'form' : form, 'userId' : userId, })
+
+# Check if the post with postId exists or not
+def validPost(postId):
+    cursor = connection.cursor()
+    checkPostSql = "SELECT 1 FROM userModule_post WHERE postId=%s"
+    cursor.execute(checkPostSql, [postId, ])
+    isValidPost = cursor.fetchone()
+    if isValidPost:
+        return True
+    return False
+
+def like(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    cursor = connection.cursor()
+    
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+
+    # Check if the user has already liked the posts or not
+    checkUserSql = "SELECT 1 FROM userModule_like WHERE userId_id=%s AND postId_id=%s"
+    cursor.execute(checkUserSql, [userId, postId, ])
+    isLiked = cursor.fetchone()
+    if isLiked:      # Already liked post
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    # Increment like value in Post table
+    likeIncrementSql = "UPDATE userModule_post SET likes=likes+1 WHERE postId=%s"
+    cursor.execute(likeIncrementSql, [postId, ])
+
+    # Create a tuple in Like table
+    addLikeSql = "INSERT INTO userModule_like (userId_id, postId_id) VALUES (%s, %s)"
+    cursor.execute(addLikeSql, [userId, postId, ])
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def getLike(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    cursor = connection.cursor()
+
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+    
+    usersLikedSql = "SELECT userId, name FROM userModule_like RIGHT JOIN userModule_user ON userId_id=userId where postId_id=%s"
+    cursor.execute(usersLikedSql, [postId, ])
+    users = dictFetchAll(cursor)
+    return render(request, 'getusers.html', {'users' : users, })
+
+def comment(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+
+    form = CommentForm()
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            content = request.POST.get('content')
+            cursor = connection.cursor()
+            # Increment comment value in Post table
+            commentIncrementSql = "UPDATE userModule_post SET comments=comments+1 WHERE postId=%s"
+            cursor.execute(commentIncrementSql, [postId, ])   
+
+            # Create a tuple in Comment table
+            addCommentSql = "INSERT INTO userModule_comment (userId_id, postId_id, content) VALUES (%s, %s, %s)"
+            cursor.execute(addCommentSql, [userId, postId, content, ])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    return render(request, 'comment.html', {'form' : form, })
+
+def getComment(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    cursor = connection.cursor()
+
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+    
+    usersCommentsSql = "SELECT userId, name, content FROM userModule_comment RIGHT JOIN userModule_user\
+                        ON userId_id=userId where postId_id=%s"
+    cursor.execute(usersCommentsSql, [postId, ])
+    users = dictFetchAll(cursor)
+    return render(request, 'getusers.html', {'users' : users, })
+
+
+def friends(request):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    cursor = connection.cursor()
+    # TODO: Complete this view
+    #getFriendsSql = "SELECT userId, name from userModule_user RIGHT JOIN userModule_friendship ON WHERE"
 
 def notfound(request):
     return render(request,'notfound.html')
