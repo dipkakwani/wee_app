@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block title %} {{groupname}} {% endblock %}
 {% block content %}
+<h2>Group Description :</h2>
+{{description}}
+<br />
+<br/>
+<h2>Posts:</h2>
 {% if posts %}
     {% for post in posts %}
         {{post.time}}
@@ -13,6 +18,9 @@
         <br/>
         <br/>
     {% endfor %}
+{% else %}
+    No Group posts to show!
+{% endif %}
     <br />
     <h2>Group Members :</h2>
     <br />
@@ -20,9 +28,6 @@
         {{member.1}}
         <br />
     {% endfor %}
-{% else %}
-    No Group posts to show!
-{% endif %}
 {% if samegroup %}
     <form action="" method="post">
         {% csrf_token %}
@@ -33,5 +38,8 @@
         {% csrf_token %}
         <input type="submit" value="Join Group" name="JoinGroup" />
     </form>
+{% endif %}
+{% if admin %}
+    <a  href="/group/{{admin}}/settings">Group Settings</a>
 {% endif %}
 {% endblock %}

@@ -106,7 +106,7 @@ def group(request,groupId):
             return HttpResponseRedirect('/group/'+str(groupId))
     
     groupname = groupexists[0][0]  #the tuple containing group name
-    group_checksql = "SELECT 1 FROM groupModule_joins where groupId_id=%s and userId_id=%s"
+    group_checksql = "SELECT 1 FROM groupModule_joins where groupId_id=%s and userId_id=%s and status='A'"
     cursor.execute(group_checksql,[groupId , userId ,])
     samegroup_check = cursor.fetchall()
     
@@ -125,7 +125,17 @@ def group(request,groupId):
     cursor.execute(postsql,[groupId,])
     posts = dictFetchAll(cursor)       #make it fetch only the top few posts later
     
-    return render(request, 'grouppage.html', {'groupname':groupname , 'posts':posts , 'members':groupmembers , 'samegroup':samegroup_check})
+    check_admin = "SELECT DISTINCT groupId FROM groupModule_group where groupId=%s and adminId_id=%s" #selecting groupid to reduce 1 more field to be sent to html
+    cursor.execute(check_admin,[groupId , userId ,])
+    adminCheck_with_id = cursor.fetchall()
+    if adminCheck_with_id:
+        adminCheck_with_id=adminCheck_with_id[0][0]
+    
+    descriptionsql = "SELECT description FROM groupModule_group WHERE groupId=%s"""
+    cursor.execute(descriptionsql , [groupId ,])
+    description = cursor.fetchall()[0][0]
+    return render(request, 'grouppage.html', {'groupname':groupname , 'posts':posts , 'members':groupmembers , 'samegroup':samegroup_check ,
+                                                                'admin':adminCheck_with_id , 'description':description})
 
     
 def groupSettings(request,groupId):
@@ -147,12 +157,12 @@ def groupSettings(request,groupId):
             acceptRequestSql = "UPDATE groupModule_joins SET status='A' where userId_id IN (%s)"
             userlist = ""
             flag = True
-            for user in pendingRequest:
+            for user in pendingRequests:
                 if flag==True:
-                    userlist.append(user)
+                    userlist +=user
                     flag = False
                     continue
-                userlist.append(",'%s'"%(user , ))
+                userlist +=",'%s'"%(user , )
             cursor.execute(acceptRequestSql , [userlist , ])
             
             if deleteMember == userId:
@@ -177,4 +187,5 @@ def selectgroup(request):
             GroupId = request.POST.get('Groups')
             return HttpResponseRedirect('/group/' + GroupId)
     return render(request, 'groupselect.html', {'groups':selgroups})
+ 
  

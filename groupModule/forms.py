@@ -13,7 +13,7 @@ class GroupCreateForm(forms.ModelForm):
     
     
     
-class GroupSettings(forms.ModelForm):
+class GroupSettings(forms.Form):
     #TODO 
     #change group type
     #kick user
@@ -23,18 +23,20 @@ class GroupSettings(forms.ModelForm):
         super(GroupSettings, self).__init__(*args, **kwargs)
         cursor = connection.cursor()
         
+        GROUP_MEMBERS = (('-', '-------'), )
         memberssql = "SELECT j.userId_id, u.name FROM groupModule_joins j,userModule_user u WHERE j.groupId_id=%s and j.status='A' and j.userId_id=u.userId"
         cursor.execute(memberssql , [groupId ,])
-        GROUP_MEMBERS = cursor.fetchall()
+        GROUP_MEMBERS += cursor.fetchall()
         self.fields['removeMembers'] = forms.ChoiceField(choices=GROUP_MEMBERS)  #change to checkbox and handle the case of admin removing himself
         
-        pendingsql = "SELECT userId_id, name FROM groupModule_joins NATURAL JOIN userModule_user WHERE status='P'"
-        cursor.execute(pendingsql)
-        PENDING_REQUEST = cursor.fetchall()
+        PENDING_REQUEST = (('-', '-------'), )
+        pendingsql = "SELECT userId_id, name FROM groupModule_joins JOIN userModule_user ON userId_id=userId WHERE groupModule_joins.status='P' and groupId_id=%s"
+        cursor.execute(pendingsql , [groupId ,])
+        PENDING_REQUEST += cursor.fetchall()
         self.fields['pendingRequests'] = forms.ChoiceField(choices = PENDING_REQUEST)
         
         GROUPTYPE = (('O', 'Open'), ('C', 'Closed'),)
-        groupTypeSql = "SELECT groupType FROM groupModule_group WHERE groupId=%s"
+        groupTypeSql = "SELECT groupType,CASE groupType WHEN 'O' THEN 'Open' ELSE 'Closed' END FROM groupModule_group WHERE groupId=%s"
         cursor.execute(groupTypeSql , [groupId ,])
         GROUP_TYPE = cursor.fetchall()
         self.fields['groupType'] = forms.ChoiceField(choices=GROUPTYPE,initial=GROUP_TYPE)
@@ -44,12 +46,6 @@ class GroupSettings(forms.ModelForm):
         DESCRIPTION = cursor.fetchall()
         self.fields['description'] = forms.CharField(widget = forms.Textarea,initial = DESCRIPTION[0][0])
         
-    class Meta:
-        model = Group
-        fields = []
-        widget = {
-                
-        }
         
         
         
@@ -59,7 +55,7 @@ class Groups(forms.Form):
         super(Groups, self).__init__(*args, **kwargs)
         cursor = connection.cursor()
         
-        groupssql = "SELECT groupId_id,groupName FROM groupModule_joins NATURAL JOIN groupModule_group WHERE groupId=groupId_id and userId_id=%s"
+        groupssql = "SELECT groupId_id,groupName FROM groupModule_joins NATURAL JOIN groupModule_group WHERE groupId=groupId_id and userId_id=%s and status='A'"
         cursor.execute(groupssql , [userId,])
         GROUPS = cursor.fetchall()
         self.fields['Groups'] = forms.ChoiceField(choices = GROUPS)
