@@ -25,7 +25,7 @@
     <h2>Group Members :</h2>
     <br />
     {% for member in members %}
-        {{member.1}}
+        <a href = "/timeline/{{member.userId_id}}" >{{member.name}}</a>
         <br />
     {% endfor %}
 {% if samegroup %}

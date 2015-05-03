@@ -113,7 +113,7 @@ def group(request,groupId):
     #dirty query!!!make it clean
     memberssql = "SELECT j.userId_id, u.name FROM groupModule_joins j,userModule_user u WHERE j.groupId_id=%s and j.status='A' and j.userId_id=u.userId"
     cursor.execute(memberssql,[groupId ,])
-    groupmembers = cursor.fetchall()
+    groupmembers = dictFetchAll(cursor)
     
     postsql = ""
     if samegroup_check:
@@ -154,7 +154,7 @@ def groupSettings(request,groupId):
             groupType = request.POST.get('groupType')
             description = request.POST.get('description')
             pendingRequests = request.POST.get('pendingRequests')
-            acceptRequestSql = "UPDATE groupModule_joins SET status='A' where userId_id IN (%s)"
+            acceptRequestSql = "UPDATE groupModule_joins SET status='A' where userId_id IN (%s) and groupId_id=%s"
             userlist = ""
             flag = True
             for user in pendingRequests:
@@ -163,14 +163,14 @@ def groupSettings(request,groupId):
                     flag = False
                     continue
                 userlist +=",'%s'"%(user , )
-            cursor.execute(acceptRequestSql , [userlist , ])
+            cursor.execute(acceptRequestSql , [userlist , groupId ,])
             
             if deleteMember == userId:
                 errors = gsettings._error.setdefault('removeMembers' , ErrorList())
                 errors.append(u"You cannot remove yourself from the group")
-            deletesql = "DELETE FROM groupModule_joins WHERE userId_id=%s"
-            cursor.execute(deletesql , [deleteMember , ])
-            groupEditsql = "UPDATE groupModule_group SET groupType=%s, description=%s where groupId=%s"
+            deletesql = "DELETE FROM groupModule_joins WHERE userId_id=%s and groupId_id=%s"
+            cursor.execute(deletesql , [deleteMember , groupId ,])
+            groupEditsql = "UPDATE groupModule_group SET groupType=%s , description=%s where groupId=%s"
             cursor.execute(groupEditsql , [groupType , description , groupId ,])
             return HttpResponseRedirect('/group/%s/settings/'%(groupId))
     return render(request, 'groupsettings.html', {'groupsettings':gsettings})
