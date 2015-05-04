@@ -15,7 +15,7 @@ from django.conf import settings
 
 from security import *
 import os
-
+defaultProfilePic = '/static/userModule/default.png'
 #Cobmined signup and login view
 def home(request):
     # Is the user already logged in
@@ -41,7 +41,7 @@ def home(request):
                 sql = "INSERT INTO userModule_user (name, email, password, dob, sex, description, profilePic, school, college,\
                         companyName, status, profession, website) VALUES (%s, %s, %s, %s, %s, '', %s, '', '', '' , '', '', '')"
                 cursor = connection.cursor()
-                cursor.execute(sql, [name, email, h, dob, sex, profilePic, ])
+                cursor.execute(sql, [name, email, h, dob, sex, defaultProfilePic, ])
                 #Equivalent in Django ORM:
                 #u = User(name=name, password=h, email=email,dob=d, sex=sex)
                 #u.save()
