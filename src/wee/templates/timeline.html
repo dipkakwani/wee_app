@@ -31,7 +31,7 @@
     {% endif %}
 
     User Info <br/>
-    Name : <b>{{user.name}}</b> <br /> 
+    Name : <b>{{user.name}}</b> <br />
     DOB : <b>{{user.dob}}</b> <br />
         {% if user.profilePic == '/static/userModule/default.png'%}
             <img src="{% static "userModule/default.png"%}" height=80px; width=80px;/> <br />
@@ -49,7 +49,7 @@
         Company : <b>{{user.companyName}} </b><br />
     {% endif %}
     {% if user.status %}
-    Status : 
+    Status :
         {% if user.status == 'S'%}
             <b>Single</b><br />
         {% else %}
@@ -69,14 +69,14 @@
         {% for post in posts %}
             {% if post.groupId_id %}
                 Group : <b>{{post.groupName}} </b>
-            {% endif %}   
+            {% endif %}
             {{post.time}}
             <br />
             <b>{{post.content}}</b>
             <br />
             <a href="/like/{{post.postId}}" class="link">
                 Like
-            </a> 
+            </a>
             <a href="/getlike/{{post.postId}}" class="link">
                 ({{post.likes}})
             </a>
@@ -88,8 +88,10 @@
             </a>
             <a href="/share/{{post.postId}}" class="link">
                 Share
-            </a> 
+            </a>
+            <a href="/getshare/{{post.postId}}" class="link">
                 ({{post.shares}})
+            </a>
             <br/>
             <br/>
         {% endfor %}
