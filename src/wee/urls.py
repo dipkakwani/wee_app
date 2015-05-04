@@ -37,6 +37,8 @@ urlpatterns = patterns('',
     url(r'^getlike/(?P<postId>\d+)/$', getLike),
     url(r'^comment/(?P<postId>\d+)/$', comment),
     url(r'^getcomment/(?P<postId>\d+)/$', getComment),
+    url(r'^share/(?P<postId>\d+)/$', share),
+    url(r'^getshare/(?P<postId>\d+)/$', getShare),
 
 
 )

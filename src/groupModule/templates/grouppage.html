@@ -12,9 +12,24 @@
         <br />
         <b>{{post.name}}: </b>{{post.content}}
         <br />
-        <b>Likes </b> {{post.likes}}
-        <b> Comments </b> {{post.comments}}
-        <b> Shares </b> {{post.shares}}
+        <a href="/like/{{post.postId}}/">
+		Likes
+	</a>
+	<a href="/getlike/{{post.postId}}/">
+		({{post.likes}})
+	</a>
+        <a href="/comment/{{post.postId}}/">
+		Comments
+	</a>
+	<a href="/getcomment/{{post.postId}}/">
+		({{post.comments}})
+	</a>
+        <a href="/share/{{post.postId}}/">	
+        	Shares
+	</a>
+	<a href="/getshare/{{post.postId}}/">
+		{{post.shares}}
+	</a>
         <br/>
         <br/>
     {% endfor %}

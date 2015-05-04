@@ -332,6 +332,79 @@ def getComment(request, postId):
     users = dictFetchAll(cursor)
     return render(request, 'getusers.html', {'users' : users, })
 
+def share(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+
+    cursor = connection.cursor()
+
+    # Check if the user has already shared the posts or not
+    checkUserSql = "SELECT 1 FROM userModule_share WHERE userId_id=%s AND originalPostId_id=%s"
+    cursor.execute(checkUserSql, [userId, postId, ])
+    hasShared = cursor.fetchone()
+    if hasShared:      # Already liked post
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    if request.method == 'POST':
+        form = PostForm(request.POST,user=userId)
+        if form.is_valid():
+            content = request.POST.get('content')
+            gorupId = request.POST.get('group')
+            privacy = request.POST.get('privacy')
+            groupId = request.POST.get('groupId')
+            # Increment share value in Post table
+            shareIncrementSql = "UPDATE userModule_post SET shares=shares+1 WHERE postId=%s"
+            cursor.execute(shareIncrementSql, [postId, ])
+
+            #create a new Post in post table
+            if groupId == '-':
+                sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content)\
+                       VALUES (%s, %s, %s, 0, 0, 0, %s)"
+                cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, ])
+            else:
+                sql = "INSERT INTO userModule_post (posterId_id, privacy, time, likes, comments, shares, content, groupId_id)\
+                       VALUES (%s, %s, %s, 0, 0, 0, %s, %s)"
+                cursor.execute(sql, [userId, privacy, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), content, groupId, ])
+
+            newPostId = cursor.lastrowid #last stuff in table
+
+            # Create a tuple in share table
+            addShareSql = "INSERT INTO userModule_share (userId_id, postId_id, originalPostId_id) VALUES (%s, %s, %s)"
+            cursor.execute(addShareSql, [userId, newPostId, postId, ])
+
+            #to get back to the same timeline
+            userTimeline = "SELECT posterId_id FROM userModule_post WHERE postId=%s"
+            cursor.execute(userTimeline , [postId ,])
+            visitingUserId = cursor.fetchall()[0][0]
+            return HttpResponseRedirect('/timeline/%s/'%(visitingUserId))
+    else:
+        contentsql = "SELECT content FROM userModule_post where postId=%s"
+        cursor.execute(contentsql , [postId ,])
+        content = cursor.fetchall()[0][0]
+        form = PostForm(user=userId)
+        form.fields['content'].initial = content    #aint sure if it works
+    return render(request, 'newpost.html', {'form' : form, 'userId' : userId})
+
+
+def getShare(request, postId):
+    userId = validateCookie(request)
+    if not userId:
+        return HttpResponseRedirect('/home')
+    cursor = connection.cursor()
+
+    if not validPost(postId):
+        return HttpResponseRedirect("/notfound")
+
+    usersSharesSql = "SELECT userId, name FROM userModule_share JOIN userModule_user\
+                        ON userId_id=userId where originalPostId_id=%s"
+    cursor.execute(usersSharesSql, [postId, ])
+    users = dictFetchAll(cursor)
+    return render(request, 'getusers.html', {'users' : users, })
+
 
 def friends(request):
     userId = validateCookie(request)

@@ -6,12 +6,8 @@ from django.db import connection
 from userModule.security import *
 from django.http import HttpResponseRedirect
 from django.forms.util import ErrorList
+from wee.views import dictFetchAll
 
-# Create your views here.
-def dictFetchAll(cursor):
-    "Returns all rows from a cursor as a dict"
-    desc = cursor.description
-    return [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
 
 def createGroup(request):
     userId=validateCookie(request)
@@ -166,8 +162,10 @@ def groupSettings(request,groupId):
             cursor.execute(acceptRequestSql , [userlist , groupId ,])
             
             if deleteMember == userId:
-                errors = gsettings._error.setdefault('removeMembers' , ErrorList())
+                errors = gsettings._errors.setdefault('removeMembers' , ErrorList())
                 errors.append(u"You cannot remove yourself from the group")
+                return render(request, 'groupsettings.html', {'groupsettings':gsettings})
+
             deletesql = "DELETE FROM groupModule_joins WHERE userId_id=%s and groupId_id=%s"
             cursor.execute(deletesql , [deleteMember , groupId ,])
             groupEditsql = "UPDATE groupModule_group SET groupType=%s , description=%s where groupId=%s"
