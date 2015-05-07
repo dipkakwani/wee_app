@@ -1,8 +1,0 @@
-Modify design of home page template.
-Add AJAX for likes, comments and shares for a post.
-Complete documentation.
-
----- Advanced TODO tasks ----
-Add friend recommendation.
-Add real time notifications.
-Add messages.

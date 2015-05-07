@@ -1,8 +1,31 @@
 <html>
 <head>
+{% load staticfiles %}
+	<link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
     <title>Wee</title>
+    <style>
+    	body{
+    		background-image: url("{% static "userModule/back.jpg"%}");
+    	}
+    	#container{
+    		text-align: center;
+    	}	
+    	#logo {
+    		margin: 0 auto;
+    		text-align:center;
+    		width: 200px;
+    		font-family: 'Indie Flower', cursive;
+    		font-size:80;
+    		border-bottom: 2px solid black;
+    	}
+    </style>
 </head>
 <body>
+<div id="container">
+	<div id="logo">
+		WEE
+	</div>
+	<br /> <br />
     <h1>Login</h1>
     <form action="" method="post">
         {% csrf_token %}
@@ -16,6 +39,7 @@
         {{signupForm.as_p}}
         <input type="submit" name="submitSignup"/>
     </form>
+ </div>
     <!-- TODO: Add javascript validation and date widget (maybe using jQuery)-->
 </body>
 </html>
